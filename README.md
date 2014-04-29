@@ -1,0 +1,4 @@
+netpaper
+========
+
+Network infrastructure documentation
