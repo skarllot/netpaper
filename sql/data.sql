@@ -1,3 +1,6 @@
+INSERT INTO dbversion VALUES
+	('0.1');
+
 INSERT INTO language VALUES
 	(1, 'pt-BR', 'Português (Brasil)');
 
@@ -9,15 +12,6 @@ INSERT INTO device_type VALUES
 	(5, 'Access Point'),
 	(6, 'Server Machine'),
 	(7, 'Desktop Machine');
-
-INSERT INTO device_type VALUES
-	(1, 'Switch'),
-	(2, 'Patch Panel'),
-	(3, 'Router'),
-	(4, 'Hub'),
-	(5, 'Access Point'),
-	(6, 'Server'),
-	(7, 'Workstation');
 
 INSERT INTO device_type_lang VALUES
 	-- pt-BR

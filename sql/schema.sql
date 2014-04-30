@@ -93,7 +93,6 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection_type` (
   `id` INT NOT NULL ,
   `name` VARCHAR(45) NULL ,
-  `description` TEXT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -322,6 +321,15 @@ CREATE  TABLE IF NOT EXISTS `netpaper`.`session` (
     REFERENCES `netpaper`.`user` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `netpaper`.`dbversion`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `netpaper`.`dbversion` (
+  `value` VARCHAR(9) NOT NULL ,
+  PRIMARY KEY (`value`) )
 ENGINE = InnoDB;
 
 USE `netpaper` ;
