@@ -9,10 +9,10 @@ USE `netpaper` ;
 -- Table `netpaper`.`location`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`location` (
-  `idlocation` INT NOT NULL ,
+  `id` INT NOT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`idlocation`) )
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -20,15 +20,15 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`rack`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`rack` (
-  `idrack` INT NOT NULL ,
-  `idlocation` INT NULL ,
+  `id` INT NOT NULL ,
+  `location` INT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`idrack`) ,
-  INDEX `fk_rack_1_idx` (`idlocation` ASC) ,
-  CONSTRAINT `fk_rack_1`
-    FOREIGN KEY (`idlocation` )
-    REFERENCES `netpaper`.`location` (`idlocation` )
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_rack_1_idx` (`location` ASC) ,
+  CONSTRAINT `fk_rack_location`
+    FOREIGN KEY (`location` )
+    REFERENCES `netpaper`.`location` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -38,10 +38,10 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device_type`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_type` (
-  `iddevice_type` INT NOT NULL ,
+  `id` INT NOT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`iddevice_type`) )
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -49,22 +49,22 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device` (
-  `iddevice` INT NOT NULL ,
-  `idrack` INT NULL ,
-  `iddevice_type` INT NULL ,
+  `id` INT NOT NULL ,
+  `rack` INT NULL ,
+  `device_type` INT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`iddevice`) ,
-  INDEX `fk_device_1_idx` (`iddevice_type` ASC) ,
-  INDEX `fk_device_2_idx` (`idrack` ASC) ,
-  CONSTRAINT `fk_device_1`
-    FOREIGN KEY (`iddevice_type` )
-    REFERENCES `netpaper`.`device_type` (`iddevice_type` )
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_device_1_idx` (`device_type` ASC) ,
+  INDEX `fk_device_2_idx` (`rack` ASC) ,
+  CONSTRAINT `fk_device_devicetype`
+    FOREIGN KEY (`device_type` )
+    REFERENCES `netpaper`.`device_type` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_device_2`
-    FOREIGN KEY (`idrack` )
-    REFERENCES `netpaper`.`rack` (`idrack` )
+  CONSTRAINT `fk_device_rack`
+    FOREIGN KEY (`rack` )
+    REFERENCES `netpaper`.`rack` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -74,15 +74,15 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device_port`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_port` (
-  `iddevice_port` INT NOT NULL ,
-  `iddevice` INT NULL ,
+  `id` INT NOT NULL ,
+  `device` INT NULL ,
   `number` SMALLINT NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`iddevice_port`) ,
-  INDEX `fk_device_port_1_idx` (`iddevice` ASC) ,
-  CONSTRAINT `fk_device_port_1`
-    FOREIGN KEY (`iddevice` )
-    REFERENCES `netpaper`.`device` (`iddevice` )
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_device_port_1_idx` (`device` ASC) ,
+  CONSTRAINT `fk_deviceport_device`
+    FOREIGN KEY (`device` )
+    REFERENCES `netpaper`.`device` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -92,10 +92,10 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`connection_type`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection_type` (
-  `idconnection_type` INT NOT NULL ,
+  `id` INT NOT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`idconnection_type`) )
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -103,36 +103,36 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`connection`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection` (
-  `idconnection` INT NOT NULL ,
-  `idconnection_type` INT NULL ,
-  `idrack` INT NULL ,
+  `id` INT NOT NULL ,
+  `connection_type` INT NULL ,
+  `rack` INT NULL ,
   `number` SMALLINT NULL ,
-  `iddevice_port1` INT NULL ,
-  `iddevice_port2` INT NULL ,
+  `deviceport_1` INT NULL ,
+  `deviceport_2` INT NULL ,
   `description` TEXT NULL ,
-  PRIMARY KEY (`idconnection`) ,
-  INDEX `fk_connection_1_idx` (`idconnection_type` ASC) ,
-  INDEX `fk_connection_2_idx` (`idrack` ASC) ,
-  INDEX `fk_connection_3_idx` (`iddevice_port1` ASC) ,
-  INDEX `fk_connection_4_idx` (`iddevice_port2` ASC) ,
-  CONSTRAINT `fk_connection_1`
-    FOREIGN KEY (`idconnection_type` )
-    REFERENCES `netpaper`.`connection_type` (`idconnection_type` )
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_connection_1_idx` (`connection_type` ASC) ,
+  INDEX `fk_connection_2_idx` (`rack` ASC) ,
+  INDEX `fk_connection_3_idx` (`deviceport_1` ASC) ,
+  INDEX `fk_connection_4_idx` (`deviceport_2` ASC) ,
+  CONSTRAINT `fk_connection_connectiontype`
+    FOREIGN KEY (`connection_type` )
+    REFERENCES `netpaper`.`connection_type` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_connection_2`
-    FOREIGN KEY (`idrack` )
-    REFERENCES `netpaper`.`rack` (`idrack` )
+  CONSTRAINT `fk_connection_rack`
+    FOREIGN KEY (`rack` )
+    REFERENCES `netpaper`.`rack` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_connection_3`
-    FOREIGN KEY (`iddevice_port1` )
-    REFERENCES `netpaper`.`device_port` (`iddevice_port` )
+  CONSTRAINT `fk_connection_deviceport_1`
+    FOREIGN KEY (`deviceport_1` )
+    REFERENCES `netpaper`.`device_port` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_connection_4`
-    FOREIGN KEY (`iddevice_port2` )
-    REFERENCES `netpaper`.`device_port` (`iddevice_port` )
+  CONSTRAINT `fk_connection_deviceport_2`
+    FOREIGN KEY (`deviceport_2` )
+    REFERENCES `netpaper`.`device_port` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
