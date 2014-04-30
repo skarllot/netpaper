@@ -10,8 +10,8 @@ INSERT INTO device_type VALUES
 	(3, 'Router'),
 	(4, 'Hub'),
 	(5, 'Access Point'),
-	(6, 'Server Machine'),
-	(7, 'Desktop Machine');
+	(6, 'Server'),
+	(7, 'Workstation');
 
 INSERT INTO device_type_lang VALUES
 	-- pt-BR
