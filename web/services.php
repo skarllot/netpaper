@@ -1,6 +1,7 @@
 <?php
 
-	require_once dirname(__FILE__).'/config/db.php';
+	require_once dirname(__FILE__).'/db/connection.php';
+	require_once dirname(__FILE__).'/db/dbversion.php';
 
 	if(isset($_REQUEST['method']) && $_REQUEST['method'] != '') {
 		extract($_REQUEST);
@@ -13,7 +14,7 @@
 
 	switch($method) {
 		case "getDBVersion":
-			$params = array("value" => 0);
+			$params = array("version" => getDBVersion());
 			echo formatData($params, $format);
 			break;
 		default:
@@ -23,11 +24,10 @@
 	}
 
 	function getDBVersion() {
-		$link = mysql_connect($DB["SERVER"], $DB["USER"], $DB["PASSWORD"]) or die('Cannot connect to database');
-		mysql_select_db($DB["DATABASE"], $link) or die('Cannot select database');
-		$query = 'SELECT * FROM dbversion';
-		$result = mysql_query($query, $link) or die('Error querying database');
-		# TODO: finalize method
+		$conn = new Connection();
+		$conn->connect();
+		$dbversion = new DBVersion($conn);
+		return $dbversion->getVersion();
 	}
 
 	function formatData($data, $format='json') {
@@ -60,5 +60,4 @@
 /*
 vim: ts=4 sw=4
 */
-
 ?>
