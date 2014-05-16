@@ -1,61 +1,73 @@
 <?php
+	require_once("config.inc.php");
+	require_once("lib/nusoap/nusoap.php");
+	require_once("session.php");
+	require_once("db/connection.php");
+	require_once("db/dbversion.php");
 
-	require_once dirname(__FILE__).'/db/connection.php';
-	require_once dirname(__FILE__).'/db/dbversion.php';
+	$server = new soap_server;
+	$server->configureWSDL('netpaper', 'urn:netpaper');
+	$server->wsdl->schemaTargetNamespace = 'urn:netpaper';
 
-	if(isset($_REQUEST['method']) && $_REQUEST['method'] != '') {
-		extract($_REQUEST);
-	} else {
-		$method = '';
+	$server->register('getDBVersion',
+		array('auth' => 'xsd:string'),
+		array('return' => 'xsd:string'),
+		'urn:netpaper',
+		'urn:netpaper#getDBVersion',
+		'rpc',
+		'encoded',
+		'Gets current version of database schema.'
+	);
+	$server->register('createSession',
+		array(),
+		array('return' => 'xsd:string'),
+		'urn:netpaper',
+		'urn:netpaper#createSession',
+		'rpc',
+		'encoded',
+		'Creates a new authentication token.'
+	);
+	$server->register('destroySession',
+		array('auth' => 'xsd:string'),
+		array('return' => 'xsd:boolean'),
+		'urn:netpaper',
+		'urn:netpaper#destroySession',
+		'rpc',
+		'encoded',
+		'Destroys the requested session.'
+	);
+
+	function createSession() {
+		$session = new Session();
+		return $session->create();
 	}
-	if(empty($format)) {
-		$format = 'json';
+
+	function destroySession($auth) {
+		$session = new Session();
+		return $session->destroy($auth);
 	}
 
-	switch($method) {
-		case "getDBVersion":
-			$params = array("version" => getDBVersion());
-			echo formatData($params, $format);
-			break;
-		default:
-			$params = array("status" => 0, "msg" => "Invalid parameters supplied");
-			echo formatData($params, $format);
-			break;
-	}
+	function getDBVersion($auth) {
+		$session = initializeSession($auth);
+		if(!$session)
+			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-	function getDBVersion() {
 		$conn = new Connection();
 		$conn->connect();
 		$dbversion = new DBVersion($conn);
 		return $dbversion->getVersion();
 	}
 
-	function formatData($data, $format='json') {
-		/* output in necessary format */
-		if($format == 'json') {
-			header('Content-type: application/json');
-			return json_encode(array('data'=>$data));
-		} else {
-			$response = '';
-			header('Content-type: text/xml');
-			$response .= '<user>';
-			foreach($data as $index => $data) {
-				if(is_array($data)) {
-					foreach($data as $key => $value) {
-						$response .= '<'.$key.'>';
-						if(is_array($value)) {
-							foreach($value as $tag => $val) {
-								$response .= '<'.$tag.'>'.htmlentities($val).'</'.$tag.'>';
-							}
-						}
-						$response .= '</'.$key.'>';
-					}
-				}
-			}
-			$response .= '</user>';
-		}
-		return $response;
+	function initializeSession($auth) {
+		$session = new Session();
+		if (!$session->start($auth))
+			return NULL;
+
+		return $session;
 	}
+
+	$HTTP_RAW_POST_DATA = isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '';
+	$server->service($HTTP_RAW_POST_DATA);
 
 /*
 vim: ts=4 sw=4

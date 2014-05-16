@@ -1,7 +1,5 @@
 <?php
 
-require_once dirname(__FILE__).'/../config/db.php';
-
 class Connection
 {
 	private $link;
@@ -12,12 +10,14 @@ class Connection
 	}
 
 	public function connect() {
-		global $DB;
-		$this->link = mysql_connect($DB["SERVER"], $DB["USER"], $DB["PASSWORD"]);
+		global $cfg;
+
+		$this->link = mysql_connect($cfg["DB"]["SERVER"],
+			$cfg["DB"]["USER"], $cfg["DB"]["PASSWORD"]);
 		if (!$this->link)
 			die('Cannot connect to database');
 
-		mysql_select_db($DB["DATABASE"], $this->link) or die('Cannot select database');
+		mysql_select_db($cfg["DB"]["DATABASE"], $this->link) or die('Cannot select database');
 	}
 
 	public function getLink() {
