@@ -32,7 +32,17 @@ class Connection
 			$query = vsprintf($query, $params);
 		}
 
-		return mysql_query($query, $this->link);
+		$result = mysql_query($query, $this->link);
+		if (!$result)
+			die('Error querying database');
+		return $result;
+	}
+
+	public function query_write($query, array $params) {
+		if (!$this->query($query, $params))
+			die('Error querying database');
+
+		return mysql_affected_rows($this->link);
 	}
 
 	private function safeString($str) {

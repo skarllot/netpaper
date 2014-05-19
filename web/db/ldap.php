@@ -12,8 +12,6 @@ class Ldap
 		$query = "SELECT domain_name, base_dn, servers_name, use_ssl,
 			use_tls, port, filter FROM ldap";
 		$result = $this->connection->query($query, array());
-		if (!$result)
-			die('Error querying database');
 		if (mysql_num_rows($result) != 1)
 			return array();
 

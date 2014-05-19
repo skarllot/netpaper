@@ -21,6 +21,19 @@
 			'filter' => array('name' => 'filter', 'type' => 'xsd:string'))
 	);
 
+	$server->register('createFirstLogin',
+		array('token' => 'xsd:string',
+			'user' => 'xsd:string',
+			'password' => 'xsd:string',
+			'email' => 'xsd:string',
+			'name' => 'xsd:string'),
+		array('return' => 'xsd:boolean'),
+		'urn:netpaper',
+		'urn:netpaper#createFirstLogin',
+		'rpc',
+		'encoded',
+		'Creates a new login when no other logins exists.'
+	);
 	$server->register('createSession',
 		array(),
 		array('return' => 'xsd:string'),
@@ -28,10 +41,10 @@
 		'urn:netpaper#createSession',
 		'rpc',
 		'encoded',
-		'Creates a new authentication token.'
+		'Creates a new session token.'
 	);
 	$server->register('destroySession',
-		array('auth' => 'xsd:string'),
+		array('token' => 'xsd:string'),
 		array('return' => 'xsd:boolean'),
 		'urn:netpaper',
 		'urn:netpaper#destroySession',
@@ -40,7 +53,7 @@
 		'Destroys the requested session.'
 	);
 	$server->register('getDBVersion',
-		array('auth' => 'xsd:string'),
+		array('token' => 'xsd:string'),
 		array('return' => 'xsd:string'),
 		'urn:netpaper',
 		'urn:netpaper#getDBVersion',
@@ -49,27 +62,58 @@
 		'Gets current version of database schema.'
 	);
 	$server->register('getLdapConfig',
-		array('auth' => 'xsd:string'),
+		array('token' => 'xsd:string'),
 		array('return' => 'tns:ldap'),
 		'urn:netpaper',
-		'urn:netpaper#getDBVersion',
+		'urn:netpaper#getLdapConfig',
 		'rpc',
 		'encoded',
-		'Gets current version of database schema.'
+		'Gets LDAP configuration parameters.'
 	);
+	$server->register('hasUsers',
+		array('token' => 'xsd:string'),
+		array('return' => 'xsd:boolean'),
+		'urn:netpaper',
+		'urn:netpaper#hasUsers',
+		'rpc',
+		'encoded',
+		'Returns whether has any user registered.'
+	);
+	$server->register('logon',
+		array('token' => 'xsd:string',
+			'user' => 'xsd:string',
+			'password' => 'xsd:string'),
+		array('return' => 'xsd:boolean'),
+		'urn:netpaper',
+		'urn:netpaper#logon',
+		'rpc',
+		'encoded',
+		'Tries to log on using specified user and password.'
+	);
+
+	function createFirstLogin($token, $user, $password, $email, $name) {
+		$session = initializeSession($token);
+		if(!$session)
+			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
+
+		$conn = new Connection();
+		$conn->connect();
+		$userclass = new User($conn);
+		return $userclass->createFirstLogin($user, $password, $email, $name);
+	}
 
 	function createSession() {
 		$session = new Session();
 		return $session->create();
 	}
 
-	function destroySession($auth) {
+	function destroySession($token) {
 		$session = new Session();
-		return $session->destroy($auth);
+		return $session->destroy($token);
 	}
 
-	function getDBVersion($auth) {
-		$session = initializeSession($auth);
+	function getDBVersion($token) {
+		$session = initializeSession($token);
 		if(!$session)
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
@@ -79,8 +123,8 @@
 		return $dbversion->getVersion();
 	}
 
-	function getLdapConfig($auth) {
-		$session = initializeSession($auth);
+	function getLdapConfig($token) {
+		$session = initializeSession($token);
 		if(!$session)
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
@@ -90,9 +134,31 @@
 		return $ldap->getConfig();
 	}
 
-	function initializeSession($auth) {
+	function hasUsers($token) {
+		$session = initializeSession($token);
+		if(!$session)
+			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
+
+		$conn = new Connection();
+		$conn->connect();
+		$ldap = new User($conn);
+		return !($ldap->isEmpty());
+	}
+
+	function logon($token, $user, $password) {
+		$session = initializeSession($token);
+		if(!$session)
+			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
+
+		$conn = new Connection();
+		$conn->connect();
+		$ldap = new User($conn);
+		return $ldap->logon($user, $password);
+	}
+
+	function initializeSession($token) {
 		$session = new Session();
-		if (!$session->start($auth))
+		if (!$session->start($token))
 			return NULL;
 
 		return $session;

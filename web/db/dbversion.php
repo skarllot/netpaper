@@ -9,10 +9,8 @@ class DBVersion
 	}
 
 	function getVersion() {
-		$query = 'SELECT * FROM dbversion';
+		$query = 'SELECT value FROM dbversion';
 		$result = $this->connection->query($query, array());
-		if (!$result)
-			die('Error querying database');
 		if (mysql_num_rows($result) != 1)
 			return 0;
 

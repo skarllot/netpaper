@@ -10,21 +10,30 @@
 		$is_json = True;
 		if(!isset($method) || empty($method))
 			$method = '';
-		if(!isset($auth) || empty($auth))
-			$auth = '';
+		if(!isset($token) || empty($token))
+			$token = '';
 
 		switch ($method) {
+			case "createFirstLogin":
+				createFirstLogin($token, $user, $password, $email, $name);
+				break;
 			case "createSession":
 				createSession();
 				break;
 			case "destroySession":
-				destroySession($auth);
+				destroySession($token);
 				break;
 			case "getDBVersion":
-				getDBVersion($auth);
+				getDBVersion($token);
 				break;
 			case "getLdapConfig":
-				getLdapConfig($auth);
+				getLdapConfig($token);
+				break;
+			case "hasUsers":
+				hasUsers($token);
+				break;
+			case "logon":
+				logon($token, $user, $password);
 				break;
 			default:
 				echo json_encode(array('error' =>
@@ -35,20 +44,33 @@
 		}
 	}
 
+	function createFirstLogin($token, $user, $password, $email, $name) {
+		return callSOAP('createFirstLogin',
+			array($token, $user, $password, $email, $name));
+	}
+
 	function createSession() {
 		return callSOAP('createSession', array());
 	}
 
-	function destroySession($auth) {
-		return callSOAP('destroySession', array($auth));
+	function destroySession($token) {
+		return callSOAP('destroySession', array($token));
 	}
 
-	function getDBVersion($auth) {
-		return callSOAP('getDBVersion', array($auth));
+	function getDBVersion($token) {
+		return callSOAP('getDBVersion', array($token));
 	}
 
-	function getLdapConfig($auth) {
-		return callSOAP('getLdapConfig', array($auth));
+	function getLdapConfig($token) {
+		return callSOAP('getLdapConfig', array($token));
+	}
+
+	function hasUsers($token) {
+		return callSOAP('hasUsers', array($token));
+	}
+
+	function logon($token, $user, $password) {
+		return callSOAP('logon', array($token, $user, $password));
 	}
 
 	function callSOAP($name, $params) {
