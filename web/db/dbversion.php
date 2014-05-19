@@ -10,14 +10,14 @@ class DBVersion
 
 	function getVersion() {
 		$query = 'SELECT * FROM dbversion';
-		$result = mysql_query($query, $this->connection->getLink());
+		$result = $this->connection->query($query, array());
 		if (!$result)
 			die('Error querying database');
 		if (mysql_num_rows($result) != 1)
 			return 0;
 
 		$val = mysql_fetch_assoc($result)["value"];
-		mysql_free_result($result);
+		$this->connection->freeQuery($result);
 		return $val;
 	}
 }

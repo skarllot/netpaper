@@ -17,7 +17,7 @@ class Session
 	}
 
 	public function start($id) {
-		if (!empty($id))
+		if (isset($id) && !empty($id))
 			session_id($id);
 
 		session_start();

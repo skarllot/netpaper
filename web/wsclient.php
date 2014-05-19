@@ -2,9 +2,12 @@
 	require_once("config.inc.php");
 	require_once("lib/nusoap/nusoap.php");
 
+	$is_json = False;
+
 	if (isset($_REQUEST['method'])) {
 		header('Content-type: application/json');
 		extract($_REQUEST);
+		$is_json = True;
 		if(!isset($method) || empty($method))
 			$method = '';
 		if(!isset($auth) || empty($auth))
@@ -20,6 +23,9 @@
 			case "getDBVersion":
 				getDBVersion($auth);
 				break;
+			case "getLdapConfig":
+				getLdapConfig($auth);
+				break;
 			default:
 				echo json_encode(array('error' =>
 					array('code' => NULL,
@@ -30,19 +36,24 @@
 	}
 
 	function createSession() {
-		callSOAP('createSession', array());
+		return callSOAP('createSession', array());
 	}
 
 	function destroySession($auth) {
-		callSOAP('destroySession', array($auth));
+		return callSOAP('destroySession', array($auth));
 	}
 
 	function getDBVersion($auth) {
-		callSOAP('getDBVersion', array($auth));
+		return callSOAP('getDBVersion', array($auth));
+	}
+
+	function getLdapConfig($auth) {
+		return callSOAP('getLdapConfig', array($auth));
 	}
 
 	function callSOAP($name, $params) {
 		global $cfg;
+		global $is_json;
 
 		$wsdl = $cfg["WS_ADDRESS"];
 		$client = new soapclient($wsdl, true);
@@ -73,7 +84,10 @@
 			return;
 		}
 
-		echo json_encode(array('result'=>$result));
+		if ($is_json)
+			echo json_encode(array('result'=>$result));
+
+		return $result;
 	}
 
 /*
