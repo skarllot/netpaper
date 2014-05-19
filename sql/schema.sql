@@ -142,7 +142,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user` (
   `id` INT NOT NULL ,
   `user` VARCHAR(45) NULL ,
-  `password` VARCHAR(45) NULL ,
+  `password` VARCHAR(64) NULL ,
   `email` VARCHAR(255) NULL ,
   `name` VARCHAR(255) NULL ,
   `admin` TINYINT(1) NULL ,
