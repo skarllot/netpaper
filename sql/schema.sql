@@ -137,33 +137,17 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `netpaper`.`provider`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `netpaper`.`provider` (
-  `id` INT NOT NULL ,
-  `name` VARCHAR(45) NULL ,
-  `priority` TINYINT NULL ,
-  PRIMARY KEY (`id`) )
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `netpaper`.`user`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user` (
   `id` INT NOT NULL ,
   `user` VARCHAR(45) NULL ,
+  `password` VARCHAR(45) NULL ,
   `email` VARCHAR(255) NULL ,
   `name` VARCHAR(255) NULL ,
   `admin` TINYINT(1) NULL ,
-  `provider` INT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_user_provider_idx` (`provider` ASC) ,
-  CONSTRAINT `fk_user_provider`
-    FOREIGN KEY (`provider` )
-    REFERENCES `netpaper`.`provider` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  `is_ldap` TINYINT(1) NULL ,
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -330,6 +314,22 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `netpaper`.`dbversion` (
   `value` VARCHAR(9) NOT NULL ,
   PRIMARY KEY (`value`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `netpaper`.`ldap`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `netpaper`.`ldap` (
+  `id` INT NOT NULL ,
+  `domain_name` VARCHAR(255) NULL ,
+  `base_dn` VARCHAR(255) NULL ,
+  `servers_name` VARCHAR(255) NULL ,
+  `use_ssl` TINYINT(1) NULL ,
+  `use_tls` TINYINT(1) NULL ,
+  `port` SMALLINT NULL ,
+  `filter` VARCHAR(255) NULL ,
+  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 USE `netpaper` ;
