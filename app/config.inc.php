@@ -1,7 +1,5 @@
 <?php
 
-$cfg["WS_ADDRESS"] = 'http://localhost/netpaper/services.php?wsdl';
-
 $cfg["DB"]["TYPE"] = 'MYSQL';
 $cfg["DB"]["SERVER"] = '127.0.0.1';
 $cfg["DB"]["PORT"] = 3306;
