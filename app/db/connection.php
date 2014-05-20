@@ -10,14 +10,13 @@ class Connection
 	}
 
 	public function connect() {
-		global $cfg;
-
-		$this->link = mysql_connect($cfg["DB"]["SERVER"],
-			$cfg["DB"]["USER"], $cfg["DB"]["PASSWORD"]);
+		$this->link = mysql_connect(Configuration::DB_SERVER,
+			Configuration::DB_USER, Configuration::DB_PASSWORD);
 		if (!$this->link)
 			die('Cannot connect to database');
 
-		mysql_select_db($cfg["DB"]["DATABASE"], $this->link) or die('Cannot select database');
+		mysql_select_db(Configuration::DB_DATABASE, $this->link)
+			or die('Cannot select database');
 	}
 
 	public function freeQuery($result) {
