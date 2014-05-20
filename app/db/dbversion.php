@@ -1,22 +1,18 @@
 <?php
 
-class DBVersion
-{
-	private $connection;
+namespace db;
+require_once("db/connection.php");
 
-	function __construct(Connection $conn) {
-		$this->connection = $conn;
-	}
+class DBVersion extends Connection
+{
+	const SQL_GET_VERSION = 'SELECT value FROM dbversion';
 
 	function getVersion() {
-		$query = 'SELECT value FROM dbversion';
-		$result = $this->connection->query($query, array());
-		if (mysql_num_rows($result) != 1)
-			return 0;
+		$rows = $this->query(self::SQL_GET_VERSION, array());
+		if (count($rows) != 1)
+			return '';
 
-		$val = mysql_fetch_assoc($result)["value"];
-		$this->connection->freeQuery($result);
-		return $val;
+		return $rows[0]['value'];
 	}
 }
 

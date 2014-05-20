@@ -34,9 +34,8 @@
 		if(!$session)
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		$conn = new Connection();
-		$conn->connect();
-		$dbversion = new DBVersion($conn);
+		db\Connection::connect();
+		$dbversion = new db\DBVersion();
 		return $dbversion->getVersion();
 	}
 
