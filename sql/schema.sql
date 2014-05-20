@@ -156,9 +156,9 @@ CREATE  TABLE IF NOT EXISTS `netpaper`.`user` (
   `password` VARCHAR(64) NULL ,
   `email` VARCHAR(255) NULL ,
   `name` VARCHAR(255) NULL ,
-  `admin` TINYINT(1) NULL ,
-  `is_ldap` TINYINT(1) NULL ,
-  `language` INT NULL ,
+  `admin` TINYINT(1) NULL DEFAULT 0 ,
+  `is_ldap` TINYINT(1) NULL DEFAULT 0 ,
+  `language` INT NULL DEFAULT 1 ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_user_1_idx` (`language` ASC) ,
   CONSTRAINT `fk_user_language`
@@ -350,13 +350,13 @@ SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `netpaper`;
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (0, 'Switch');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (1, 'Patch Panel');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (2, 'Router');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (3, 'Hub');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (4, 'Access Point');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (5, 'Server');
-INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (6, 'Workstation');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Switch');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Patch Panel');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Router');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Hub');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Access Point');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Server');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (DEFAULT, 'Workstation');
 
 COMMIT;
 
@@ -365,10 +365,10 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `netpaper`;
-INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (0, 'Electrical Patch Cord');
-INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (1, 'Optical Patch Cord');
-INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (2, 'Electrical Cable');
-INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (3, 'Optical Cable');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (DEFAULT, 'Electrical Patch Cord');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (DEFAULT, 'Optical Patch Cord');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (DEFAULT, 'Electrical Cable');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (DEFAULT, 'Optical Cable');
 
 COMMIT;
 
@@ -377,8 +377,8 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `netpaper`;
-INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (0, 'en-US', 'English (Default)');
-INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (1, 'pt-BR', 'Português (Brasil)');
+INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (DEFAULT, 'en-US', 'English (Default)');
+INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (DEFAULT, 'pt-BR', 'Português (Brasil)');
 
 COMMIT;
 
@@ -387,10 +387,10 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `netpaper`;
-INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 0, 'Patch Cord Elétrico');
-INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 1, 'Patch Cord Óptico');
-INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 2, 'Cabo Elétrico');
-INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 3, 'Cabo Óptico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (2, 1, 'Patch Cord Elétrico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (2, 2, 'Patch Cord Óptico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (2, 3, 'Cabo Elétrico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (2, 4, 'Cabo Óptico');
 
 COMMIT;
 
@@ -399,13 +399,13 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 USE `netpaper`;
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 0, 'Switch');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 1, 'Patch Panel');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 2, 'Roteador');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 3, 'Hub');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 4, 'Access Point');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 5, 'Servidor');
-INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 6, 'Estação de Trabalho');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 1, 'Switch');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 2, 'Patch Panel');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 3, 'Roteador');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 4, 'Hub');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 5, 'Access Point');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 6, 'Servidor');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (2, 7, 'Estação de Trabalho');
 
 COMMIT;
 
