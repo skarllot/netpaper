@@ -9,7 +9,7 @@ USE `netpaper` ;
 -- Table `netpaper`.`location`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`location` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) )
@@ -20,7 +20,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`rack`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`rack` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `location` INT NULL ,
   `name` VARCHAR(45) NULL ,
   `description` TEXT NULL ,
@@ -38,7 +38,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device_type`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_type` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -48,7 +48,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `rack` INT NULL ,
   `device_type` INT NULL ,
   `name` VARCHAR(45) NULL ,
@@ -73,7 +73,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`device_port`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_port` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `device` INT NULL ,
   `number` SMALLINT NULL ,
   `description` TEXT NULL ,
@@ -91,7 +91,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`connection_type`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection_type` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -101,7 +101,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`connection`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `connection_type` INT NULL ,
   `rack` INT NULL ,
   `number` SMALLINT NULL ,
@@ -137,17 +137,35 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `netpaper`.`language`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `netpaper`.`language` (
+  `id` INT NOT NULL AUTO_INCREMENT ,
+  `code` VARCHAR(5) NULL ,
+  `name` VARCHAR(45) NULL ,
+  PRIMARY KEY (`id`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `netpaper`.`user`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `user` VARCHAR(45) NULL ,
   `password` VARCHAR(64) NULL ,
   `email` VARCHAR(255) NULL ,
   `name` VARCHAR(255) NULL ,
   `admin` TINYINT(1) NULL ,
   `is_ldap` TINYINT(1) NULL ,
-  PRIMARY KEY (`id`) )
+  `language` INT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_user_1_idx` (`language` ASC) ,
+  CONSTRAINT `fk_user_language`
+    FOREIGN KEY (`language` )
+    REFERENCES `netpaper`.`language` (`id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -155,7 +173,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`group`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`group` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `name` VARCHAR(45) NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -165,7 +183,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`user_group`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user_group` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `user` INT NULL ,
   `group` INT NULL ,
   PRIMARY KEY (`id`) ,
@@ -188,7 +206,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`access_location`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`access_location` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `group` INT NULL ,
   `location` INT NULL ,
   PRIMARY KEY (`id`) ,
@@ -211,7 +229,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`access_rack`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`access_rack` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `group` INT NULL ,
   `rack` INT NULL ,
   PRIMARY KEY (`id`) ,
@@ -227,17 +245,6 @@ CREATE  TABLE IF NOT EXISTS `netpaper`.`access_rack` (
     REFERENCES `netpaper`.`rack` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `netpaper`.`language`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `netpaper`.`language` (
-  `id` INT NOT NULL ,
-  `code` VARCHAR(5) NULL ,
-  `name` VARCHAR(45) NULL ,
-  PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
 
@@ -291,7 +298,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`session`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`session` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `user` INT NULL ,
   `auth_token` VARCHAR(255) NULL ,
   `ipaddress` VARCHAR(15) NULL ,
@@ -312,8 +319,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`dbversion`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`dbversion` (
-  `value` VARCHAR(9) NOT NULL ,
-  PRIMARY KEY (`value`) )
+  `value` VARCHAR(9) NOT NULL )
 ENGINE = InnoDB;
 
 
@@ -321,7 +327,7 @@ ENGINE = InnoDB;
 -- Table `netpaper`.`ldap`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`ldap` (
-  `id` INT NOT NULL ,
+  `id` INT NOT NULL AUTO_INCREMENT ,
   `domain_name` VARCHAR(255) NULL ,
   `base_dn` VARCHAR(255) NULL ,
   `servers_name` VARCHAR(255) NULL ,
@@ -338,3 +344,76 @@ USE `netpaper` ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`device_type`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (0, 'Switch');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (1, 'Patch Panel');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (2, 'Router');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (3, 'Hub');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (4, 'Access Point');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (5, 'Server');
+INSERT INTO `netpaper`.`device_type` (`id`, `name`) VALUES (6, 'Workstation');
+
+COMMIT;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`connection_type`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (0, 'Electrical Patch Cord');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (1, 'Optical Patch Cord');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (2, 'Electrical Cable');
+INSERT INTO `netpaper`.`connection_type` (`id`, `name`) VALUES (3, 'Optical Cable');
+
+COMMIT;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`language`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (0, 'en-US', 'English (Default)');
+INSERT INTO `netpaper`.`language` (`id`, `code`, `name`) VALUES (1, 'pt-BR', 'Português (Brasil)');
+
+COMMIT;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`connection_type_lang`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 0, 'Patch Cord Elétrico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 1, 'Patch Cord Óptico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 2, 'Cabo Elétrico');
+INSERT INTO `netpaper`.`connection_type_lang` (`language`, `connection_type`, `name`) VALUES (1, 3, 'Cabo Óptico');
+
+COMMIT;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`device_type_lang`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 0, 'Switch');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 1, 'Patch Panel');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 2, 'Roteador');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 3, 'Hub');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 4, 'Access Point');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 5, 'Servidor');
+INSERT INTO `netpaper`.`device_type_lang` (`language`, `device_type`, `name`) VALUES (1, 6, 'Estação de Trabalho');
+
+COMMIT;
+
+-- -----------------------------------------------------
+-- Data for table `netpaper`.`dbversion`
+-- -----------------------------------------------------
+START TRANSACTION;
+USE `netpaper`;
+INSERT INTO `netpaper`.`dbversion` (`value`) VALUES ('0.1');
+
+COMMIT;
