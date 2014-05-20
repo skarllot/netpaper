@@ -1,5 +1,7 @@
 <?php
 
+	require_once("lib/ldap.php");
+
 class User
 {
 	private $connection;
@@ -83,6 +85,36 @@ class User
 	}
 
 	private function logonLdap($user, $password) {
+		// Database user validation
+		$query = "SELECT admin FROM user WHERE user = '%s'";
+		$result = $this->connection->query($query, array($user));
+		if (!$result)
+			die('Error querying database');
+		if (mysql_num_rows($result) != 1)
+			return False;
+
+		$val = mysql_fetch_assoc($result)["admin"];
+		$this->connection->freeQuery($result);
+
+		// LDAP user and password validation
+		$ldapdb = new Ldap($this->connection);
+		$ldapcfg = $ldapdb->getConfig();
+		if (count($ldapcfg) == 0)
+			return False;
+
+		$ldap = new ldap\LDAP(
+			$ldapcfg['servers_name'], $ldapcfg['domain_name'],
+			$user, $password);
+		$users = $ldap->get_users($user);
+
+		if(empty($users[0]['name']))
+			return False;
+
+		// Set session variables
+		if ((bool)$val)
+			$_SESSION['admin'] = True;
+		$_SESSION['user'] = $user;
+		return True;
 	}
 
 	private function saltPassword($user, $password) {
