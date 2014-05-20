@@ -68,32 +68,32 @@ class User
 
 	private function logonLocal($user, $password) {
 		$password = $this->saltPassword($user, $password);
-		$query = "SELECT admin FROM user WHERE user = '%s' AND password = '%s'";
+		$query = "SELECT admin, language FROM user WHERE user = '%s' AND password = '%s'";
 		$result = $this->connection->query($query, array($user, $password));
 		if (!$result)
 			die('Error querying database');
 		if (mysql_num_rows($result) != 1)
 			return False;
 
-		$val = mysql_fetch_assoc($result)["admin"];
+		$row = mysql_fetch_assoc($result);
 		$this->connection->freeQuery($result);
 
-		if ((bool)$val)
-			$_SESSION['admin'] = True;
 		$_SESSION['user'] = $user;
+		$_SESSION['language'] = $row['language'];
+		$_SESSION['admin'] = ((bool)$row['admin']);
 		return True;
 	}
 
 	private function logonLdap($user, $password) {
 		// Database user validation
-		$query = "SELECT admin FROM user WHERE user = '%s'";
+		$query = "SELECT admin, language FROM user WHERE user = '%s'";
 		$result = $this->connection->query($query, array($user));
 		if (!$result)
 			die('Error querying database');
 		if (mysql_num_rows($result) != 1)
 			return False;
 
-		$val = mysql_fetch_assoc($result)["admin"];
+		$row = mysql_fetch_assoc($result);
 		$this->connection->freeQuery($result);
 
 		// LDAP user and password validation
@@ -111,9 +111,9 @@ class User
 			return False;
 
 		// Set session variables
-		if ((bool)$val)
-			$_SESSION['admin'] = True;
 		$_SESSION['user'] = $user;
+		$_SESSION['language'] = $row['language'];
+		$_SESSION['admin'] = ((bool)$row['admin']);
 		return True;
 	}
 
