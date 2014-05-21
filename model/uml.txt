@@ -1,53 +1,97 @@
 @startuml
 
 namespace dal {
-	Connection <|-- DBVersion
-	Connection <|-- Ldap
-	Connection <|-- Location
-	Connection <|-- User
+	Adapters <|-- DBVersionAdapter
+	Adapters <|-- LdapAdapter
+	Adapters <|-- LocationAdapter
+	Adapters <|-- UserAdapter
+
+	DBVersionAdapter -- DBVersionRow
+	LdapAdapter -- LdapRow
+	LocationAdapter -- LocationRow
+	UserAdapter -- UserRow
 
 	class Connection {
-	  #{static} pdo : PDO
-	  +{static} void connect()
-	  +array insert()
-	  +{static} bool isConnected()
-	  +array query()
+		-pdo : PDO
+		+void connect()
+		+array insert()
+		+bool isConnected()
+		+array query()
 	}
 
-	class DBVersion {
-	  -SQL_GET_VERSION : String
-	  +String getVersion()
+	class Adapters {
+		#PDO getConnection()
 	}
 
-	class Ldap {
-		-SQL_GET_CONFIG : String
-		+array getConfig()
+	class DBVersionAdapter {
+		-{static} SQL_GET_VERSION : String
+		+DBVersionRow getVersion()
+	}
+
+	class DBVersionRow {
+		+value : String
+	}
+
+	class LanguageRow {
+		+id : int
+		+code : String
+		+name : String
+	}
+
+	class LdapAdapter {
+		-{static} SQL_GET_CONFIG : String
+		+LdapRow getConfig()
 		+bool hasUser()
 	}
 
-	class Location {
-		-SQL_GET_LOCATIONS : String
-		+array getLocations()
+	class LdapRow {
+		+id : int
+		+domain_name : String
+		+base_dn : String
+		+servers_name : String
+		+use_ssl : bool
+		+use_tls : bool
+		+port : int
+		+filter : String
 	}
 
-	class User {
-		-SQL_GET_USERS_COUNT : String
-		-SQL_CREATE_USER : String
-		-SQL_IS_LDAP : String
-		-SQL_GET_USER : String
-		-SQL_GET_USER_WITH_PASSWORD : String
-		+bool createUser()
-		+array getUser()
-		+array getUserWithPassword()
+	class LocationAdapter {
+		-{static} SQL_GET_LOCATIONS : String
+		+LocationRow[] getLocations()
+	}
+
+	class LocationRow {
+		+id : int
+		+name : String
+		+description : String
+	}
+
+	class UserAdapter {
+		-{static} SQL_GET_USERS_COUNT : String
+		-{static} SQL_CREATE_USER : String
+		-{static} SQL_IS_LDAP : String
+		-{static} SQL_GET_USER : String
+		-{static} SQL_GET_USER_WITH_PASSWORD : String
+		+bool createUser( row : UserRow )
+		+UserRow getUser( user : String )
+		+UserRow getUserWithPassword( user : String, password : String)
 		+int getUsersCount()
 		+bool isLdap()
+	}
+
+	class UserRow {
+		+id : int
+		+user : String
+		+password : String
+		+email : String
+		+name : String
+		+admin : bool
+		+is_ldap : bool
+		+language : int
 	}
 }
 
 namespace bll {
-'	DBVersion *- "1" dal.DBVersion
-'	Ldap *- "1" dal.Ldap
-
 	class DBVersion {
 		-dal_dbversion : dal.DBVersion
 		+constructor()
@@ -61,18 +105,18 @@ namespace bll {
 	}
 
 	class Session {
-		-VALIDATION_ID : String
-		+String createToken()
-		+bool destroyToken()
-		+bool getIsAdmin()
-		+bool getIsValid()
-		+int getLanguage()
-		+String getUser()
-		+void setIsAdmin()
-		+void setIsValid()
-		+void setLanguage()
-		+void setToken()
-		+void setUser()
+		-{static} VALIDATION_ID : String
+		+{static} String createToken()
+		+{static} bool destroyToken()
+		+{static} bool getIsAdmin()
+		+{static} bool getIsValid()
+		+{static} int getLanguage()
+		+{static} String getUser()
+		+{static} void setIsAdmin()
+		+{static} void setIsValid()
+		+{static} void setLanguage()
+		+{static} void setToken()
+		+{static} void setUser()
 	}
 
 	class User {
