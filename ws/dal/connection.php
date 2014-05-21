@@ -31,14 +31,15 @@ class Connection
 		return $rows;
 	}
 
-	public function query_write($sql, array $params) {
+	public function insert($sql, array $params) {
 		$query = self::$pdo->prepare($sql);
 		try { $query->execute($params); }
 		catch (\PDOException $e) { die($e->getMessage()); }
 
-		$count = $query->rowCount();
+		$ret = array('count' => $query->rowCount(),
+			'lastId' => self::$pdo->lastInsertId());
 		$query->closeCursor();
-		return $count;
+		return $ret;
 	}
 }
 

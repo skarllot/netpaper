@@ -17,11 +17,11 @@ class User extends Connection
 
 	function createUser($user, $password, $email, $name,
 		$isadmin, $isldap, $lang) {
-		$count = $this->query_write(self::SQL_CREATE_USER,
+		$ret = $this->insert(self::SQL_CREATE_USER,
 			array(':user' => $user, ':pass' => $password, ':email' => $email,
 			':name' => $name, ':admin' => $isadmin, ':isldap' => $isldap,
 			':lang' => $lang));
-		if ($count != 1)
+		if ($ret['count'] != 1)
 			return False;
 
 		return True;
