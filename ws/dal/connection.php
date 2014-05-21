@@ -23,7 +23,9 @@ class Connection
 
 	public function query($sql, array $params) {
 		$query = self::$pdo->prepare($sql);
-		$query->execute($params);
+		try { $query->execute($params); }
+		catch (\PDOException $e) { die($e->getMessage()); }
+
 		$rows = $query->fetchAll();
 		$query->closeCursor();
 		return $rows;
@@ -31,7 +33,9 @@ class Connection
 
 	public function query_write($sql, array $params) {
 		$query = self::$pdo->prepare($sql);
-		$query->execute($params);
+		try { $query->execute($params); }
+		catch (\PDOException $e) { die($e->getMessage()); }
+
 		$count = $query->rowCount();
 		$query->closeCursor();
 		return $count;

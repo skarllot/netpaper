@@ -15,6 +15,16 @@ class Session
 		$_SESSION['admin'] = $isadmin;
 	}
 
+	public static function getLanguage() {
+		if (!isset($_SESSION['lang']))
+			return -1;
+		return $_SESSION['lang'];
+	}
+
+	public static function setLanguage($lang) {
+		$_SESSION['lang'] = $lang;
+	}
+
 	public static function getUser() {
 		if (!isset($_SESSION['user']))
 			return NULL;

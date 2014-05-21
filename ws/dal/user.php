@@ -1,7 +1,6 @@
 <?php
 
 namespace dal;
-require_once("lib/ldap.php");
 require_once("dal/connection.php");
 
 class User extends Connection
@@ -11,6 +10,10 @@ class User extends Connection
 		(user, password, email, name, admin, is_ldap, language)
 		VALUES (:user, :pass, :email, :name, :admin, :isldap, :lang)';
 	const SQL_IS_LDAP = 'SELECT is_ldap FROM user WHERE user = :user';
+	const SQL_GET_USER = 'SELECT id, name, admin, language
+		FROM user WHERE user = :user';
+	const SQL_GET_USER_WITH_PASSWORD = 'SELECT id, name, admin, language
+		FROM user WHERE user = :user AND password = :pass';
 
 	function createUser($user, $password, $email, $name,
 		$isadmin, $isldap, $lang) {
@@ -22,6 +25,22 @@ class User extends Connection
 			return False;
 
 		return True;
+	}
+
+	function getUser($user) {
+		$rows = $this->query(self::SQL_GET_USER,
+			array(':user' => $user));
+		if (count($rows) != 1)
+			return NULL;
+		return $rows[0];
+	}
+
+	function getUserWithPassword($user, $password) {
+		$rows = $this->query(self::SQL_GET_USER_WITH_PASSWORD,
+			array(':user' => $user, ':pass' => $password));
+		if (count($rows) != 1)
+			return NULL;
+		return $rows[0];
 	}
 
 	function getUsersCount() {
@@ -39,57 +58,6 @@ class User extends Connection
 			return False;
 
 		return ((bool)$rows[0]['is_ldap']);
-	}
-
-	private function logonLocal($user, $password) {
-		$password = $this->saltPassword($user, $password);
-		$query = "SELECT admin, language FROM user WHERE user = '%s' AND password = '%s'";
-		$result = $this->connection->query($query, array($user, $password));
-		if (!$result)
-			die('Error querying database');
-		if (mysql_num_rows($result) != 1)
-			return False;
-
-		$row = mysql_fetch_assoc($result);
-		$this->connection->freeQuery($result);
-
-		$_SESSION['user'] = $user;
-		$_SESSION['language'] = $row['language'];
-		$_SESSION['admin'] = ((bool)$row['admin']);
-		return True;
-	}
-
-	private function logonLdap($user, $password) {
-		// Database user validation
-		$query = "SELECT admin, language FROM user WHERE user = '%s'";
-		$result = $this->connection->query($query, array($user));
-		if (!$result)
-			die('Error querying database');
-		if (mysql_num_rows($result) != 1)
-			return False;
-
-		$row = mysql_fetch_assoc($result);
-		$this->connection->freeQuery($result);
-
-		// LDAP user and password validation
-		$ldapdb = new Ldap($this->connection);
-		$ldapcfg = $ldapdb->getConfig();
-		if (count($ldapcfg) == 0)
-			return False;
-
-		$ldap = new ldap\LDAP(
-			$ldapcfg['servers_name'], $ldapcfg['domain_name'],
-			$user, $password);
-		$users = $ldap->get_users($user);
-
-		if(empty($users[0]['name']))
-			return False;
-
-		// Set session variables
-		$_SESSION['user'] = $user;
-		$_SESSION['language'] = $row['language'];
-		$_SESSION['admin'] = ((bool)$row['admin']);
-		return True;
 	}
 }
 

@@ -1,82 +1,59 @@
 <?php
 
 	require_once("lib/nusoap/nusoap.php");
-	require_once("session.php");
-	require_once("db/connection.php");
-	require_once("db/dbversion.php");
-	require_once("db/ldap.php");
-	require_once("db/user.php");
+	require_once("bll/dbversion.php");
+	require_once("bll/ldap.php");
+	require_once("bll/session.php");
+	require_once("bll/user.php");
 
 	function createFirstLogin($token, $user, $password, $email, $name) {
-		$session = initializeSession($token);
-		if(!$session)
+		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		$conn = new Connection();
-		$conn->connect();
-		$userclass = new User($conn);
+		$userclass = new \bll\User();
 		return $userclass->createFirstLogin($user, $password, $email, $name);
 	}
 
 	function createSession() {
-		$session = new Session();
-		return $session->create();
+		return \bll\Session::createToken();
 	}
 
 	function destroySession($token) {
-		$session = new Session();
-		return $session->destroy($token);
+		return \bll\Session::destroyToken($token);
 	}
 
 	function getDBVersion($token) {
-		$session = initializeSession($token);
-		if(!$session)
+		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		db\Connection::connect();
-		$dbversion = new db\DBVersion();
+		$dbversion = new \bll\DBVersion();
 		return $dbversion->getVersion();
 	}
 
 	function getLdapConfig($token) {
-		$session = initializeSession($token);
-		if(!$session)
+		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
+		if (!\bll\Session::getIsAdmin())
+			return new nusoap_fault('2', 'checkPermission', 'Insufficient permissions', '');
 
-		$conn = new Connection();
-		$conn->connect();
-		$ldap = new Ldap($conn);
+		$ldap = new \bll\Ldap();
 		return $ldap->getConfig();
 	}
 
 	function hasUsers($token) {
-		$session = initializeSession($token);
-		if(!$session)
+		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		$conn = new Connection();
-		$conn->connect();
-		$ldap = new User($conn);
-		return !($ldap->isEmpty());
+		$userclass = new \bll\User();
+		return $userclass->hasUsers();
 	}
 
 	function logon($token, $user, $password) {
-		$session = initializeSession($token);
-		if(!$session)
+		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		$conn = new Connection();
-		$conn->connect();
-		$ldap = new User($conn);
-		return $ldap->logon($user, $password);
-	}
-
-	function initializeSession($token) {
-		$session = new Session();
-		if (!$session->start($token))
-			return NULL;
-
-		return $session;
+		$userclass = new \bll\User();
+		return $userclass->logon($user, $password);
 	}
 
 /*

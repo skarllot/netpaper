@@ -37,19 +37,18 @@
 				array('code' => NULL,
 				'description' => 'Invalid parameters supplied',
 				'innerError' => NULL)));
-			break;
+			return;
 	}
 
-	if (isset($result)) {
-		if ($result instanceof nusoap_fault)
-			echo json_encode(array('error' =>
-				array('code' => $result->faultcode,
-				'description' => $result->faultstring,
-				'innerError' => NULL))
-			);
-		else
-			echo json_encode(array('result'=>$result));
-	}
+	if ($result instanceof nusoap_fault)
+		echo json_encode(array('error' =>
+			array('code' => $result->faultcode,
+			'description' => $result->faultstring,
+			'innerError' => NULL))
+		);
+	else
+		echo json_encode(array('result'=>$result));
+
 /*
 vim: ts=4 sw=4
 */
