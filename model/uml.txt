@@ -1,0 +1,92 @@
+@startuml
+
+namespace dal {
+	Connection <|-- DBVersion
+	Connection <|-- Ldap
+	Connection <|-- Location
+	Connection <|-- User
+
+	class Connection {
+	  #{static} pdo : PDO
+	  +{static} void connect()
+	  +array insert()
+	  +{static} bool isConnected()
+	  +array query()
+	}
+
+	class DBVersion {
+	  -SQL_GET_VERSION : String
+	  +String getVersion()
+	}
+
+	class Ldap {
+		-SQL_GET_CONFIG : String
+		+array getConfig()
+		+bool hasUser()
+	}
+
+	class Location {
+		-SQL_GET_LOCATIONS : String
+		+array getLocations()
+	}
+
+	class User {
+		-SQL_GET_USERS_COUNT : String
+		-SQL_CREATE_USER : String
+		-SQL_IS_LDAP : String
+		-SQL_GET_USER : String
+		-SQL_GET_USER_WITH_PASSWORD : String
+		+bool createUser()
+		+array getUser()
+		+array getUserWithPassword()
+		+int getUsersCount()
+		+bool isLdap()
+	}
+}
+
+namespace bll {
+'	DBVersion *- "1" dal.DBVersion
+'	Ldap *- "1" dal.Ldap
+
+	class DBVersion {
+		-dal_dbversion : dal.DBVersion
+		+constructor()
+		+String getVersion()
+	}
+
+	class Ldap {
+		-dal_ldap : dal.Ldap
+		+constructor()
+		+String getConfig()
+	}
+
+	class Session {
+		-VALIDATION_ID : String
+		+String createToken()
+		+bool destroyToken()
+		+bool getIsAdmin()
+		+bool getIsValid()
+		+int getLanguage()
+		+String getUser()
+		+void setIsAdmin()
+		+void setIsValid()
+		+void setLanguage()
+		+void setToken()
+		+void setUser()
+	}
+
+	class User {
+		-dal_user : dal.User
+		-dal_ldap : dal.Ldap
+		+constructor()
+		+bool createFirstLogin()
+		+bool hasUsers()
+		+bool logon()
+		-array logonLdap()
+		-array logonLocal()
+		-{static} String saltPassword()
+	}
+}
+
+' vim: ts=2 sw=2
+@enduml
