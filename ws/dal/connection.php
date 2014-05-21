@@ -1,6 +1,7 @@
 <?php
 
-namespace db;
+namespace dal;
+require_once("config.inc.php");
 
 class Connection
 {
@@ -16,6 +17,10 @@ class Connection
 		}
 	}
 
+	public static function isConnected() {
+		return (isset(self::$pdo) && self::$pdo instanceof \PDO);
+	}
+
 	public function query($sql, array $params) {
 		$query = self::$pdo->prepare($sql);
 		$query->execute($params);
@@ -24,11 +29,12 @@ class Connection
 		return $rows;
 	}
 
-	public function query_write($query, array $params) {
-		if (!$this->query($query, $params))
-			die('Error querying database');
-
-		return mysql_affected_rows($this->link);
+	public function query_write($sql, array $params) {
+		$query = self::$pdo->prepare($sql);
+		$query->execute($params);
+		$count = $query->rowCount();
+		$query->closeCursor();
+		return $count;
 	}
 }
 

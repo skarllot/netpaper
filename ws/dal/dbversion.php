@@ -1,7 +1,7 @@
 <?php
 
-namespace db;
-require_once("db/connection.php");
+namespace dal;
+require_once("dal/connection.php");
 
 class DBVersion extends Connection
 {

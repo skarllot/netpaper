@@ -1,7 +1,6 @@
 <?php
 
 	require_once("lib/nusoap/nusoap.php");
-	require_once("config.inc.php");
 	require_once("session.php");
 	require_once("db/connection.php");
 	require_once("db/dbversion.php");
