@@ -10,7 +10,7 @@ USE `netpaper` ;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`location` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
@@ -21,8 +21,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`rack` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `location` INT NULL ,
-  `name` VARCHAR(45) NULL ,
+  `location` INT NOT NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_rack_1_idx` (`location` ASC) ,
@@ -39,7 +39,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_type` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -49,9 +49,9 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `rack` INT NULL ,
-  `device_type` INT NULL ,
-  `name` VARCHAR(45) NULL ,
+  `rack` INT NOT NULL ,
+  `device_type` INT NOT NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_device_1_idx` (`device_type` ASC) ,
@@ -74,8 +74,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_port` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `device` INT NULL ,
-  `number` SMALLINT NULL ,
+  `device` INT NOT NULL ,
+  `number` SMALLINT NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_device_port_1_idx` (`device` ASC) ,
@@ -92,7 +92,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection_type` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -102,11 +102,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `connection_type` INT NULL ,
-  `rack` INT NULL ,
-  `number` SMALLINT NULL ,
-  `deviceport_1` INT NULL ,
-  `deviceport_2` INT NULL ,
+  `connection_type` INT NOT NULL ,
+  `rack` INT NOT NULL ,
+  `deviceport_1` INT NOT NULL ,
+  `deviceport_2` INT NOT NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   `description` TEXT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_connection_1_idx` (`connection_type` ASC) ,
@@ -141,8 +141,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`language` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `code` VARCHAR(5) NULL ,
-  `name` VARCHAR(45) NULL ,
+  `code` VARCHAR(5) NOT NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -152,13 +152,13 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `user` VARCHAR(45) NULL ,
+  `user` VARCHAR(45) NOT NULL ,
   `password` VARCHAR(64) NULL ,
   `email` VARCHAR(255) NULL ,
-  `name` VARCHAR(255) NULL ,
-  `admin` TINYINT(1) NULL DEFAULT 0 ,
-  `is_ldap` TINYINT(1) NULL DEFAULT 0 ,
-  `language` INT NULL DEFAULT 1 ,
+  `name` VARCHAR(255) NOT NULL ,
+  `admin` TINYINT(1) NOT NULL DEFAULT 0 ,
+  `is_ldap` TINYINT(1) NOT NULL DEFAULT 0 ,
+  `language` INT NOT NULL DEFAULT 1 ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_user_1_idx` (`language` ASC) ,
   CONSTRAINT `fk_user_language`
@@ -174,7 +174,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`group` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`id`) )
 ENGINE = InnoDB;
 
@@ -184,8 +184,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`user_group` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `user` INT NULL ,
-  `group` INT NULL ,
+  `user` INT NOT NULL ,
+  `group` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_usergroup_user_idx` (`user` ASC) ,
   INDEX `fk_usergroup_group_idx` (`group` ASC) ,
@@ -207,8 +207,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`access_location` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `group` INT NULL ,
-  `location` INT NULL ,
+  `group` INT NOT NULL ,
+  `location` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_accesslocation_group_idx` (`group` ASC) ,
   INDEX `fk_accesslocation_location_idx` (`location` ASC) ,
@@ -230,8 +230,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`access_rack` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `group` INT NULL ,
-  `rack` INT NULL ,
+  `group` INT NOT NULL ,
+  `rack` INT NOT NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_accessrack_group_idx` (`group` ASC) ,
   INDEX `fk_accessrack_rack_idx` (`rack` ASC) ,
@@ -254,7 +254,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `netpaper`.`connection_type_lang` (
   `language` INT NOT NULL ,
   `connection_type` INT NOT NULL ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`language`, `connection_type`) ,
   INDEX `fk_connectiontypelang_language_idx` (`language` ASC) ,
   INDEX `fk_connectiontypelang_connectiontype_idx` (`connection_type` ASC) ,
@@ -277,7 +277,7 @@ ENGINE = InnoDB;
 CREATE  TABLE IF NOT EXISTS `netpaper`.`device_type_lang` (
   `language` INT NOT NULL ,
   `device_type` INT NOT NULL ,
-  `name` VARCHAR(45) NULL ,
+  `name` VARCHAR(45) NOT NULL ,
   PRIMARY KEY (`language`, `device_type`) ,
   INDEX `fk_devicetypelang_language_idx` (`language` ASC) ,
   INDEX `fk_devicetypelang_devicetype_idx` (`device_type` ASC) ,
@@ -299,11 +299,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`session` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `user` INT NULL ,
-  `auth_token` VARCHAR(255) NULL ,
+  `user` INT NOT NULL ,
+  `auth_token` VARCHAR(255) NOT NULL ,
   `ipaddress` VARCHAR(15) NULL ,
   `ip6address` VARCHAR(39) NULL ,
-  `created_at` DATETIME NULL ,
+  `created_at` DATETIME NOT NULL ,
   `updated_at` DATETIME NULL ,
   PRIMARY KEY (`id`) ,
   INDEX `fk_session_user_idx` (`user` ASC) ,
@@ -328,11 +328,11 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `netpaper`.`ldap` (
   `id` INT NOT NULL AUTO_INCREMENT ,
-  `domain_name` VARCHAR(255) NULL ,
+  `domain_name` VARCHAR(255) NOT NULL ,
   `base_dn` VARCHAR(255) NULL ,
-  `servers_name` VARCHAR(255) NULL ,
-  `use_ssl` TINYINT(1) NULL ,
-  `use_tls` TINYINT(1) NULL ,
+  `servers_name` VARCHAR(255) NOT NULL ,
+  `use_ssl` TINYINT(1) NOT NULL ,
+  `use_tls` TINYINT(1) NOT NULL ,
   `port` SMALLINT NULL ,
   `filter` VARCHAR(255) NULL ,
   PRIMARY KEY (`id`) )

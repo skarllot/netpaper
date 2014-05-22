@@ -1,11 +1,16 @@
 @startuml
+title Logon Sequence
+
 actor User
 participant UI
 participant "Web Service" as WS
 
+
 == No user exists ==
 User -> UI
 activate UI
+UI -> WS: createSession
+WS -> UI: token
 UI -> WS: hasUsers
 WS -> UI
 UI -> User: Show first login creation
@@ -22,6 +27,8 @@ deactivate UI
 == At least one user exists ==
 User -> UI
 activate UI
+UI -> WS: createSession
+WS -> UI: token
 UI -> WS: hasUsers
 WS -> UI
 UI -> User: Request logon
