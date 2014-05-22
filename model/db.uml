@@ -1,0 +1,119 @@
+@startuml
+!define table(x) class x << (T,#FFAAAA) >>
+!define pk(x) <u>x</u>
+!define fk(x) <i>x</i>
+hide methods
+hide stereotypes
+
+user " 1 " *.. " n " user_group
+group " 1 " *.. " n " user_group
+group " 1 " *.. " n " access_location
+group " 1 " *.. " n " access_rack
+location " 1 " *.. " n " rack
+location " 1 " *.. " n " access_location
+rack " 1 " *.. " n " device
+rack " 1 " *.. " n " connection
+rack " 1 " *.. " n " access_rack
+device_type " 1 " *.. " n " device
+device_type " 1 " *-- " n " device_type_lang
+connection_type " 1 " *.. " n " connection
+connection_type " 1 " *-- " n " connection_type_lang
+language " 1 " *.. " n " user
+language " 1 " *-- " n " connection_type_lang
+language " 1 " *-- " n " device_type_lang
+
+table(language) {
+	#id : int
+	-code : varchar[5]
+	-name : varchar[45]
+}
+
+table(user) {
+	#id : int
+	-user : varchar[45]
+	-password : varchar[64]
+	-email : varchar[255]
+	-name : varchar[255]
+	-admin : boolean
+	-is_ldap : boolean
+	+language : int
+}
+
+table(user_group) {
+	#id : int
+	+user : int
+	+group : int
+}
+
+table(group) {
+	#id : int
+	-name : varchar[45]
+}
+
+table(location) {
+	#id : int
+	-name : varchar[45]
+	-description : text
+}
+
+table(rack) {
+	#id : int
+	+location : int
+	-name : varchar[45]
+	-description : text
+}
+
+table(device_type) {
+	#id : int
+	-name : varchar[45]
+}
+
+table(device) {
+	#id : int
+	+rack : int
+	+device_type : int
+	-name : varchar[45]
+	-description : text
+}
+
+table(connection_type) {
+	#id : int
+	-name : varchar[45]
+}
+
+table(connection) {
+	#id : int
+	+connection_type : int
+	+rack : int
+	-number : smallint
+	+deviceport_1 : int
+	+deviceport_2 : int
+	-description : text
+}
+
+table(device_type_lang) {
+	#language : int
+	#device_type : int
+	-name : varchar[45]
+}
+
+table(connection_type_lang) {
+	#language : int
+	#connection_type : int
+	-name : varchar[45]
+}
+
+table(access_location) {
+	#id : int
+	+group : int
+	+location : int
+}
+
+table(access_rack) {
+	#id : int
+	+group : int
+	+rack : int
+}
+
+' vim: ts=2 sw=2
+@enduml
