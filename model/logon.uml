@@ -1,0 +1,31 @@
+@startuml
+actor User
+participant UI
+participant "Web Service" as WS
+
+== No user exists ==
+User -> UI
+activate UI
+UI -> WS: hasUsers
+WS -> UI
+UI -> User: Show first login creation
+deactivate UI
+
+User -> UI: Submit login fields
+activate UI
+UI -> WS: createFirstLogin
+WS -> UI
+UI -> User: Show creation success
+UI -> User: Request logon
+deactivate UI
+
+== At least one user exists ==
+User -> UI
+activate UI
+UI -> WS: hasUsers
+WS -> UI
+UI -> User: Request logon
+deactivate UI
+
+' vim: ts=2 sw=2
+@enduml
