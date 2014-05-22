@@ -6,6 +6,7 @@ hide methods
 hide stereotypes
 
 user " 1 " *.. " n " user_group
+user " 1 " *.. " n " session
 group " 1 " *.. " n " user_group
 group " 1 " *.. " n " access_location
 group " 1 " *.. " n " access_rack
@@ -14,6 +15,9 @@ location " 1 " *.. " n " access_location
 rack " 1 " *.. " n " device
 rack " 1 " *.. " n " connection
 rack " 1 " *.. " n " access_rack
+device " 1 " *.. " n " device_port
+device_port " 1 " *.. " n " connection
+device_port " 1 " *.. " n " connection
 device_type " 1 " *.. " n " device
 device_type " 1 " *-- " n " device_type_lang
 connection_type " 1 " *.. " n " connection
@@ -21,6 +25,21 @@ connection_type " 1 " *-- " n " connection_type_lang
 language " 1 " *.. " n " user
 language " 1 " *-- " n " connection_type_lang
 language " 1 " *-- " n " device_type_lang
+
+table(dbversion) {
+	-value : varchar[9]
+}
+
+table(ldap) {
+	#id : int
+	-domain_name : varchar[255]
+	-base_dn : varchar[255]
+	-servers_name : varchar[255]
+	-use_ssl : boolean
+	-use_tls : boolean
+	-port : smallint
+	-filter : varchar[255]
+}
 
 table(language) {
 	#id : int
@@ -37,6 +56,16 @@ table(user) {
 	-admin : boolean
 	-is_ldap : boolean
 	+language : int
+}
+
+table(session) {
+	#id : int
+	+user : int
+	-auth_token : varchar[255]
+	-ipaddress : varchar[15]
+	-ip6address : varchar[39]
+	-created_at : datetime
+	-updated_at : datetime
 }
 
 table(user_group) {
@@ -73,6 +102,13 @@ table(device) {
 	+rack : int
 	+device_type : int
 	-name : varchar[45]
+	-description : text
+}
+
+table(device_port) {
+	#id : int
+	+device : int
+	-number : smallint
 	-description : text
 }
 
