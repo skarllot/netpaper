@@ -1,10 +1,12 @@
 <?php
 
 	require_once("lib/nusoap/nusoap.php");
-	require_once("bll/dbversion.php");
+    require_once 'bll/Migration.php';
+    require_once 'bll/session.php';
+	/*require_once("bll/dbversion.php");
 	require_once("bll/ldap.php");
 	require_once("bll/session.php");
-	require_once("bll/user.php");
+	require_once("bll/user.php");*/
 
 	function createFirstLogin($token, $user, $password, $email, $name) {
 		if (!\bll\Session::setToken($token))
@@ -14,20 +16,12 @@
 		return $userclass->createFirstLogin($user, $password, $email, $name);
 	}
 
-	function createSession() {
-		return \bll\Session::createToken();
-	}
-
-	function destroySession($token) {
-		return \bll\Session::destroyToken($token);
-	}
-
 	function getDBVersion($token) {
 		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
 
-		$dbversion = new \bll\DBVersion();
-		return $dbversion->getVersion();
+        $migration = new bll\Migration();
+        return $migration->getVersion();
 	}
 
 	function getLdapConfig($token) {

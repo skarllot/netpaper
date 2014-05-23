@@ -1,3 +1,5 @@
 *~
 *.bak
+/model/*.png
+/model/*.mwb
 /nbproject/private/

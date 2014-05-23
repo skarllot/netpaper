@@ -19,7 +19,7 @@ namespace dal {
 		+array query()
 	}
 
-	class Adapters {
+	class Adapter {
 		#PDO getConnection()
 	}
 

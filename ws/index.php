@@ -3,9 +3,10 @@
 	require_once("lib/nusoap/nusoap.php");
 	require_once("methods.php");
 
+    $namespace = 'urn:netpaper';
 	$server = new soap_server;
-	$server->configureWSDL('netpaper', 'urn:netpaper');
-	$server->wsdl->schemaTargetNamespace = 'urn:netpaper';
+	$server->configureWSDL('netpaper', $namespace);
+	$server->wsdl->schemaTargetNamespace = $namespace;
 
 	$server->wsdl->addComplexType('ldap', 'complexType', 'struct', 'all', '',
 		array('domain_name' => array('name' => 'domain_name', 'type' => 'xsd:string'),
@@ -24,35 +25,17 @@
 			'email' => 'xsd:string',
 			'name' => 'xsd:string'),
 		array('return' => 'xsd:boolean'),
-		'urn:netpaper',
-		'urn:netpaper#createFirstLogin',
+		$namespace,
+		$namespace . '#createFirstLogin',
 		'rpc',
 		'encoded',
 		'Creates a new login when no other logins exists.'
 	);
-	$server->register('createSession',
-		array(),
-		array('return' => 'xsd:string'),
-		'urn:netpaper',
-		'urn:netpaper#createSession',
-		'rpc',
-		'encoded',
-		'Creates a new session token.'
-	);
-	$server->register('destroySession',
-		array('token' => 'xsd:string'),
-		array('return' => 'xsd:boolean'),
-		'urn:netpaper',
-		'urn:netpaper#destroySession',
-		'rpc',
-		'encoded',
-		'Destroys the requested session.'
-	);
 	$server->register('getDBVersion',
 		array('token' => 'xsd:string'),
 		array('return' => 'xsd:string'),
-		'urn:netpaper',
-		'urn:netpaper#getDBVersion',
+		$namespace,
+		$namespace . '#getDBVersion',
 		'rpc',
 		'encoded',
 		'Gets current version of database schema.'
@@ -60,8 +43,8 @@
 	$server->register('getLdapConfig',
 		array('token' => 'xsd:string'),
 		array('return' => 'tns:ldap'),
-		'urn:netpaper',
-		'urn:netpaper#getLdapConfig',
+		$namespace,
+		$namespace . '#getLdapConfig',
 		'rpc',
 		'encoded',
 		'Gets LDAP configuration parameters.'
@@ -69,8 +52,8 @@
 	$server->register('hasUsers',
 		array('token' => 'xsd:string'),
 		array('return' => 'xsd:boolean'),
-		'urn:netpaper',
-		'urn:netpaper#hasUsers',
+		$namespace,
+		$namespace . '#hasUsers',
 		'rpc',
 		'encoded',
 		'Returns whether has any user registered.'
@@ -80,8 +63,8 @@
 			'user' => 'xsd:string',
 			'password' => 'xsd:string'),
 		array('return' => 'xsd:boolean'),
-		'urn:netpaper',
-		'urn:netpaper#logon',
+		$namespace,
+		$namespace . '#logon',
 		'rpc',
 		'encoded',
 		'Tries to log on using specified user and password.'
