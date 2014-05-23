@@ -1,10 +1,12 @@
 @startuml
 
+class Exception
+
 namespace dal {
-	Adapters <|-- DBVersionAdapter
-	Adapters <|-- LdapAdapter
-	Adapters <|-- LocationAdapter
-	Adapters <|-- UserAdapter
+	Adapter <|-- DBVersionAdapter
+	Adapter <|-- LdapAdapter
+	Adapter <|-- LocationAdapter
+	Adapter <|-- UserAdapter
 
 	DBVersionAdapter -- DBVersionRow
 	LdapAdapter -- LdapRow
@@ -12,20 +14,26 @@ namespace dal {
 	UserAdapter -- UserRow
 
 	class Connection {
+		-{static} dsn : String
+		-{static} user : String
+		-{static} password : String
+		-{static} isInitialized : bool
 		-pdo : PDO
 		+void connect()
-		+array insert()
+		-{static} init()
+		+array insert( sql : String, params : array )
 		+bool isConnected()
-		+array query()
+		+array query( sql : String, params : array)
 	}
 
 	class Adapter {
-		#PDO getConnection()
+		#conn : Connection
+		+void constructor( connection : Connection )
 	}
 
 	class DBVersionAdapter {
 		-{static} SQL_GET_VERSION : String
-		+DBVersionRow getVersion()
+		+String getVersion()
 	}
 
 	class DBVersionRow {
@@ -41,7 +49,7 @@ namespace dal {
 	class LdapAdapter {
 		-{static} SQL_GET_CONFIG : String
 		+LdapRow getConfig()
-		+bool hasUser()
+		+{static} bool validateUser( servers : String, domain : String, user : String, password : String )
 	}
 
 	class LdapRow {
@@ -53,6 +61,7 @@ namespace dal {
 		+use_tls : bool
 		+port : int
 		+filter : String
+		+{static} getInstance( row : array )
 	}
 
 	class LocationAdapter {
@@ -67,14 +76,14 @@ namespace dal {
 	}
 
 	class UserAdapter {
-		-{static} SQL_GET_USERS_COUNT : String
+		-{static} SQL_GET_USER_COUNT : String
 		-{static} SQL_CREATE_USER : String
 		-{static} SQL_IS_LDAP : String
 		-{static} SQL_GET_USER : String
 		-{static} SQL_GET_USER_WITH_PASSWORD : String
 		+bool createUser( row : UserRow )
 		+UserRow getUser( user : String )
-		+UserRow getUserWithPassword( user : String, password : String)
+		+UserRow getUser( user : String, password : String)
 		+int getUsersCount()
 		+bool isLdap()
 	}
@@ -88,47 +97,46 @@ namespace dal {
 		+admin : bool
 		+is_ldap : bool
 		+language : int
+		+{static} getInstance( row : array )
 	}
 }
 
 namespace bll {
-	class DBVersion {
-		-dal_dbversion : dal.DBVersion
-		+constructor()
-		+String getVersion()
-	}
+	.Exception <|-- InvalidSessionException
 
-	class Ldap {
-		-dal_ldap : dal.Ldap
-		+constructor()
-		+String getConfig()
+	class Migration {
+		-conn : dal.Connection
+		+String getVersion()
 	}
 
 	class Session {
 		-{static} VALIDATION_ID : String
-		+{static} String createToken()
-		+{static} bool destroyToken()
-		+{static} bool getIsAdmin()
-		+{static} bool getIsValid()
-		+{static} int getLanguage()
-		+{static} String getUser()
-		+{static} void setIsAdmin()
-		+{static} void setIsValid()
-		+{static} void setLanguage()
-		+{static} void setToken()
-		+{static} void setUser()
+		-token : String
+		+{static} Session create()
+		+bool destroy()
+		+{static} Session getInstance( token : String )
+		+bool getIsAdmin()
+		-bool getIsValid()
+		+int getLanguage()
+		+String getToken()
+		+String getUser()
+		+void setIsAdmin( isadmin : bool )
+		+void setIsValid( isvalid : bool )
+		+void setLanguage( lang : int )
+		+void setUser()
 	}
 
-	class User {
-		-dal_user : dal.User
-		-dal_ldap : dal.Ldap
-		+constructor()
-		+bool createFirstLogin()
+	class Logon {
+		-conn : dal.Connection
+		-dldap : dal.LdapAdapter
+		-duser : dal.UserAdapter
+		-session : Session
+		+constructor( session : Session )
+		+bool createFirstLogin( user : String, password : String, email : String, name : String )
+		+{static} Logon getInstance( session : Session )
 		+bool hasUsers()
-		+bool logon()
-		-array logonLdap()
-		-array logonLocal()
-		-{static} String saltPassword()
+		+bool initialize( user : String, password : String )
+		-{static} String saltPassword( user : String, password : String )
 	}
 }
 

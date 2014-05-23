@@ -30,5 +30,5 @@ class DBVersionRow {
      *
      * @var string
      */
-    public $version;
+    public $value;
 }

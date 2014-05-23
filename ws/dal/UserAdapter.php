@@ -43,15 +43,15 @@ class UserAdapter extends Adapter {
 
     /**
      * 
-     * @param \dal\UserRow $user
+     * @param \dal\UserRow $row
      * @return boolean
      */
-    function createUser(UserRow $user) {
+    function createUser(UserRow $row) {
         $ret = $this->conn->insert(self::SQL_CREATE_USER,
-                array(':user' => $user->user, ':pass' => $user->password,
-                    ':email' => $user->email, ':name' => $user->name,
-                    ':admin' => $user->admin, ':isldap' => $user->is_ldap,
-                    ':lang' => $user->language)
+                array(':user' => $row->user, ':pass' => $row->password,
+                    ':email' => $row->email, ':name' => $row->name,
+                    ':admin' => $row->admin, ':isldap' => $row->is_ldap,
+                    ':lang' => $row->language)
                 );
         if ($ret['count'] != 1)
             return False;
