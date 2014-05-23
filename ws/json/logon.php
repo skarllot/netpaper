@@ -1,6 +1,6 @@
 <?php
 
-/*
+/* 
  * Copyright (C) 2014 Fabrício Godoy <skarllot@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -30,11 +30,14 @@ if (!isset($token) || empty($token)) {
 
 try {
     switch ($method) {
-        case "create":
-            $result = create();
+        case "createFirstLogin":
+            $result = createFirstLogin($token, $user, $password, $email, $name);
             break;
-        case "destroy":
-            $result = destroy($token);
+        case "doLogon":
+            $result = doLogon($token, $user, $password);
+            break;
+        case "hasUsers":
+            $result = hasUsers($token);
             break;
         default:
             echo json_encode(array('error' =>

@@ -3,23 +3,25 @@ title Logon Sequence
 
 actor User
 participant UI
-participant "Web Service" as WS
+boundary "Web Service" as WS
+control Session
+control Logon
 
 
 == No user exists ==
 User -> UI
 activate UI
-UI -> WS: createSession
-WS -> UI: token
-UI -> WS: hasUsers
-WS -> UI
-UI -> User: Show first login creation
+UI -> Session: create
+Session -> UI: token
+UI -> Logon: hasUsers
+Logon -> UI
+UI -> User: Request first login creation
 deactivate UI
 
 User -> UI: Submit login fields
 activate UI
-UI -> WS: createFirstLogin
-WS -> UI
+UI -> Logon: createFirstLogin
+Logon -> UI
 UI -> User: Show creation success
 UI -> User: Request logon
 deactivate UI
@@ -27,11 +29,26 @@ deactivate UI
 == At least one user exists ==
 User -> UI
 activate UI
-UI -> WS: createSession
-WS -> UI: token
-UI -> WS: hasUsers
-WS -> UI
+UI -> Session: create
+Session -> UI: token
+UI -> Logon: hasUsers
+Logon -> UI
 UI -> User: Request logon
+deactivate UI
+
+== ==
+User -> UI: Submit logon fields
+activate UI
+UI -> Logon: doLogon
+Logon -> UI
+UI -> User: Redirect to home page
+deactivate UI
+...
+User -> UI: Request logoff
+activate UI
+UI -> Session: destroy
+Session -> UI
+UI -> User: Redirect to logon page
 deactivate UI
 
 ' vim: ts=2 sw=2

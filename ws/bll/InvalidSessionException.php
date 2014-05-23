@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2014 Fabrício Godoy <skarllot@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -18,20 +18,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-require_once 'lib/nusoap/nusoap.php';
-require_once 'bll/Session.php';
+namespace bll;
 
-function create() {
-    $session = \bll\Session::create();
-    return $session->getToken();
-}
-
-function destroy($token) {
-    try {
-        $session = \bll\Session::getInstance($token);
-        return $session->destroy();
-    } catch (Exception $ex) {
-        return new nusoap_fault($ex->getCode(), 'session.destroy',
-                $ex->getMessage(), $ex);
+/**
+ * Occurs when an invalid session token is parsed.
+ *
+ * @author Fabrício Godoy <skarllot@gmail.com>
+ */
+class InvalidSessionException extends \Exception {
+    function __construct() {
+        parent::__construct('Invalid session token', 1, NULL);
     }
 }

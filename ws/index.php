@@ -18,28 +18,6 @@
 			'filter' => array('name' => 'filter', 'type' => 'xsd:string'))
 	);
 
-	$server->register('createFirstLogin',
-		array('token' => 'xsd:string',
-			'user' => 'xsd:string',
-			'password' => 'xsd:string',
-			'email' => 'xsd:string',
-			'name' => 'xsd:string'),
-		array('return' => 'xsd:boolean'),
-		$namespace,
-		$namespace . '#createFirstLogin',
-		'rpc',
-		'encoded',
-		'Creates a new login when no other logins exists.'
-	);
-	$server->register('getDBVersion',
-		array('token' => 'xsd:string'),
-		array('return' => 'xsd:string'),
-		$namespace,
-		$namespace . '#getDBVersion',
-		'rpc',
-		'encoded',
-		'Gets current version of database schema.'
-	);
 	$server->register('getLdapConfig',
 		array('token' => 'xsd:string'),
 		array('return' => 'tns:ldap'),
@@ -48,26 +26,6 @@
 		'rpc',
 		'encoded',
 		'Gets LDAP configuration parameters.'
-	);
-	$server->register('hasUsers',
-		array('token' => 'xsd:string'),
-		array('return' => 'xsd:boolean'),
-		$namespace,
-		$namespace . '#hasUsers',
-		'rpc',
-		'encoded',
-		'Returns whether has any user registered.'
-	);
-	$server->register('logon',
-		array('token' => 'xsd:string',
-			'user' => 'xsd:string',
-			'password' => 'xsd:string'),
-		array('return' => 'xsd:boolean'),
-		$namespace,
-		$namespace . '#logon',
-		'rpc',
-		'encoded',
-		'Tries to log on using specified user and password.'
 	);
 
 	$HTTP_RAW_POST_DATA = isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '';

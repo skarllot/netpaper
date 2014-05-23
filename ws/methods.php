@@ -8,14 +8,6 @@
 	require_once("bll/session.php");
 	require_once("bll/user.php");*/
 
-	function createFirstLogin($token, $user, $password, $email, $name) {
-		if (!\bll\Session::setToken($token))
-			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
-
-		$userclass = new \bll\User();
-		return $userclass->createFirstLogin($user, $password, $email, $name);
-	}
-
 	function getDBVersion($token) {
 		if (!\bll\Session::setToken($token))
 			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
@@ -32,22 +24,6 @@
 
 		$ldap = new \bll\Ldap();
 		return $ldap->getConfig();
-	}
-
-	function hasUsers($token) {
-		if (!\bll\Session::setToken($token))
-			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
-
-		$userclass = new \bll\User();
-		return $userclass->hasUsers();
-	}
-
-	function logon($token, $user, $password) {
-		if (!\bll\Session::setToken($token))
-			return new nusoap_fault('1', 'initializeSession', 'Invalid session ID', '');
-
-		$userclass = new \bll\User();
-		return $userclass->logon($user, $password);
 	}
 
 /*

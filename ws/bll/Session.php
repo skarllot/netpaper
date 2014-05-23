@@ -19,38 +19,56 @@
  */
 
 namespace bll;
+require_once 'bll/InvalidSessionException.php';
 
 class Session
 {
 	const VALIDATION_ID = 'wBSsq2MYvFbOcdcv';
+    /**
+     *
+     * @var string
+     */
+    private $token;
+    
+    private function __construct($token) {
+        $this->token = $token;
+    }
 
-	public static function getIsAdmin() {
+    public function getIsAdmin() {
 		return (isset($_SESSION['admin']) &&
 			((bool)$_SESSION['admin']));
 	}
 
-	public static function getIsValid() {
+	private function getIsValid() {
 		return (isset($_SESSION['VALIDATION_ID']) &&
 			$_SESSION['VALIDATION_ID'] == self::VALIDATION_ID);
 	}
 
-	public static function getLanguage() {
+	public function getLanguage() {
 		if (!isset($_SESSION['lang']))
 			return -1;
 		return $_SESSION['lang'];
 	}
+    
+    /**
+     * 
+     * @return string
+     */
+    public function getToken() {
+        return $this->token;
+    }
 
-	public static function getUser() {
+    public function getUser() {
 		if (!isset($_SESSION['user']))
 			return NULL;
 		return $_SESSION['user'];
 	}
 
-	public static function setIsAdmin($isadmin) {
+	public function setIsAdmin($isadmin) {
 		$_SESSION['admin'] = $isadmin;
 	}
 
-	public static function setIsValid($isvalid) {
+	private function setIsValid($isvalid) {
 		if ($isvalid) {
 			$_SESSION['VALIDATION_ID'] = self::VALIDATION_ID;
         } else {
@@ -58,42 +76,58 @@ class Session
         }
 	}
 
-	public static function setLanguage($lang) {
+	public function setLanguage($lang) {
 		$_SESSION['lang'] = $lang;
 	}
 
-	public static function setUser($user) {
+	public function setUser($user) {
 		$_SESSION['user'] = $user;
 	}
 
-	public static function createToken() {
+    /**
+     * 
+     * @return \bll\Session
+     */
+	public static function create() {
 		session_start();
-		self::setIsValid(True);
-		return session_id();
+        
+        $ret = new Session(session_id());
+        $ret->setIsValid(TRUE);
+        return $ret;
 	}
 
-	public static function setToken($token = NULL) {
-		if (isset($token) && !empty($token))
-			session_id($token);
-
-		session_start();
-
-		if (!self::getIsValid()) {
-			self::destroyToken();
-			return False;
-		}
-		return True;
-	}
-
-	public static function destroyToken($token = NULL) {
+    /**
+     * 
+     * @param string $token
+     * @return \bll\Session
+     * @throws InvalidSessionException
+     */
+    public static function getInstance($token = NULL) {
 		if (isset($token) && !empty($token)) {
 			session_id($token);
-			session_start();
-		}
+        } else {
+            $token = session_id();
+        }
+        if (empty($token)) {
+            throw new InvalidSessionException();
+        }
 
-		if (!self::getIsValid())
-			return False;
-		self::setIsValid(False);
+		session_start();
+        $ret = new Session($token);
+        if (!$ret->getIsValid()) {
+            throw new InvalidSessionException();
+        }
+        return $ret;
+    }
+
+    /**
+     * 
+     * @return boolean
+     */
+	public function destroy() {
+        if (!$this->getIsValid())
+            return FALSE;
+        $this->setIsValid(FALSE);
 
 		$_SESSION = array();
 		if (isset($_COOKIE[session_name()]))

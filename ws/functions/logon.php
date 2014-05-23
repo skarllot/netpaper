@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  * Copyright (C) 2014 Fabrício Godoy <skarllot@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -19,19 +19,38 @@
  */
 
 require_once 'lib/nusoap/nusoap.php';
+require_once 'bll/Logon.php';
 require_once 'bll/Session.php';
 
-function create() {
-    $session = \bll\Session::create();
-    return $session->getToken();
-}
-
-function destroy($token) {
+function createFirstLogin($token, $user, $password, $email, $name) {
     try {
         $session = \bll\Session::getInstance($token);
-        return $session->destroy();
+        $logon = \bll\Logon::getInstance($session);
+        return $logon->createFirstLogin($user, $password, $email, $name);
     } catch (Exception $ex) {
-        return new nusoap_fault($ex->getCode(), 'session.destroy',
+        return new nusoap_fault($ex->getCode(), 'logon.createFirstLogin',
+                $ex->getMessage(), $ex);
+    }
+}
+
+function doLogon($token, $user, $password) {
+    try {
+        $session = \bll\Session::getInstance($token);
+        $logon = \bll\Logon::getInstance($session);
+        return $logon->initialize($user, $password);
+    } catch (Exception $ex) {
+        return new nusoap_fault($ex->getCode(), 'logon.doLogon',
+                $ex->getMessage(), $ex);
+    }
+}
+
+function hasUsers($token) {
+    try {
+        $session = \bll\Session::getInstance($token);
+        $logon = \bll\Logon::getInstance($session);
+        return $logon->hasUsers();
+    } catch (Exception $ex) {
+        return new nusoap_fault($ex->getCode(), 'logon.hasUsers',
                 $ex->getMessage(), $ex);
     }
 }
