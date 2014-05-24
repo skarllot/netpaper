@@ -5,26 +5,26 @@
 hide methods
 hide stereotypes
 
-user " 1 " *.. " n " user_group
-user " 1 " *.. " n " session
-group " 1 " *.. " n " user_group
-group " 1 " *.. " n " access_location
-group " 1 " *.. " n " access_rack
-location " 1 " *.. " n " rack
-location " 1 " *.. " n " access_location
-rack " 1 " *.. " n " device
-rack " 1 " *.. " n " connection
-rack " 1 " *.. " n " access_rack
-device " 1 " *.. " n " device_port
-device_port " 1 " *.. " n " connection
-device_port " 1 " *.. " n " connection
-device_type " 1 " *.. " n " device
-device_type " 1 " *-- " n " device_type_lang
-connection_type " 1 " *.. " n " connection
-connection_type " 1 " *-- " n " connection_type_lang
-language " 1 " *.. " n " user
-language " 1 " *-- " n " connection_type_lang
-language " 1 " *-- " n " device_type_lang
+user " 1 " .. " 1..* " user_group
+user " 1 " .. " 1..* " session
+group " 1 " .. " 1..* " user_group
+access_location " 1..* " .. " 1 " group
+access_rack " 1..* " .. " 1 " group
+location " 1 " .. " 1..* " rack
+location " 1 " .. " 1..* " access_location
+rack " 1 " .. " 1..* " device
+rack " 1 " .. " 1..* " connection
+rack " 1 " .. " 1..* " access_rack
+device " 1 " .. " 1..* " device_port
+device_port " 1 " .. " 1..* " connection
+device_port " 1 " .. " 1..* " connection
+device_type " 1 " .. " 1..* " device
+device_type " 1 " -- " 1..* " device_type_lang
+connection_type " 1 " .. " 1..* " connection
+connection_type_lang " 1..* " -- " 1 " connection_type
+language " 1 " .. " 1..* " user
+language " 1 " -- " 1..* " connection_type_lang
+language " 1 " -- " 1..* " device_type_lang
 
 table(dbversion) {
 	-value : varchar[9]

@@ -11,44 +11,86 @@ control Logon
 == No user exists ==
 User -> UI
 activate UI
-UI -> Session: create
-Session -> UI: token
-UI -> Logon: hasUsers
-Logon -> UI
-UI -> User: Request first login creation
+	UI -> WS: create
+	activate WS
+		WS -> Session
+		activate Session
+		Session -> WS: token
+		deactivate Session
+		WS -> UI
+	deactivate WS
+	UI -> WS: hasUsers
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: False
+		deactivate Logon
+		WS -> UI
+	deactivate WS
+	UI -> User: Require login creation
 deactivate UI
 
 User -> UI: Submit login fields
 activate UI
-UI -> Logon: createFirstLogin
-Logon -> UI
-UI -> User: Show creation success
-UI -> User: Request logon
+	UI -> WS: createFirstLogin
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: True
+		deactivate Logon
+		WS -> UI
+	deactivate WS
+	UI -> User: Creation success
+	UI -> User: Request logon
 deactivate UI
 
 == At least one user exists ==
 User -> UI
 activate UI
-UI -> Session: create
-Session -> UI: token
-UI -> Logon: hasUsers
-Logon -> UI
-UI -> User: Request logon
+	UI -> WS: create
+	activate WS
+		WS -> Session
+		activate Session
+		Session -> WS: token
+		deactivate Session
+		WS -> UI
+	deactivate WS
+	UI -> WS: hasUsers
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: True
+		deactivate Logon
+		WS -> UI
+	deactivate WS
+	UI -> User: Request logon
 deactivate UI
 
 == ==
-User -> UI: Submit logon fields
+User -> UI: Logon fields
 activate UI
-UI -> Logon: doLogon
-Logon -> UI
-UI -> User: Redirect to home page
+	UI -> WS: doLogon
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: True
+		deactivate Logon
+		WS -> UI
+	deactivate WS
+	UI -> User: Dashboard page
 deactivate UI
 ...
 User -> UI: Request logoff
 activate UI
-UI -> Session: destroy
-Session -> UI
-UI -> User: Redirect to logon page
+	UI -> WS: destroy
+	activate WS
+		WS -> Session
+		activate Session
+		Session -> WS: True
+		deactivate Session
+		WS -> UI
+	deactivate WS
+	UI -> User: Logon page
 deactivate UI
 
 ' vim: ts=2 sw=2

@@ -1,0 +1,32 @@
+@startuml
+title Dashboard sequence
+
+actor User
+participant UI
+boundary "Web Service" as WS
+control Dashboard
+
+User -> UI
+activate UI
+UI -> WS: getUserInfo
+activate WS
+WS -> Dashboard
+activate Dashboard
+Dashboard -> WS: User name,\nUser full name,\nUser admin status
+deactivate Dashboard
+WS -> UI
+deactivate WS
+
+UI -> WS: getAccessList
+activate WS
+WS -> Dashboard
+activate Dashboard
+Dashboard -> WS: Normal list,\nAdministrative list
+deactivate Dashboard
+WS -> UI
+deactivate WS
+UI -> User: Return dashboard page
+deactivate UI
+
+' vim: ts=2 sw=2
+@enduml
