@@ -36,6 +36,9 @@ try {
         case "destroy":
             $result = destroy($token);
             break;
+        case "validate":
+            $result = validate($token);
+            break;
         default:
             echo json_encode(array('error' =>
                 array('code' => NULL,

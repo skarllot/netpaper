@@ -28,7 +28,7 @@ if (isset($_REQUEST['json']) && $_REQUEST['json'] == 1) {
 
 $namespace = 'urn:netpaper:logon';
 $server = new nusoap_server;
-$server->configureWSDL('netpaper', $namespace);
+$server->configureWSDL('NetPaper logon control', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
 $server->wsdl->addComplexType('LanguageRow', 'complexType', 'struct', 'all', '',

@@ -28,7 +28,7 @@ if (isset($_REQUEST['json']) && $_REQUEST['json'] == 1) {
 
 $namespace = 'urn:netpaper:session';
 $server = new soap_server;
-$server->configureWSDL('netpaper', $namespace);
+$server->configureWSDL('NetPaper session control', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
 
 $server->register('create',
@@ -49,6 +49,15 @@ $server->register('destroy',
     'encoded',
     'Destroys the requested session.'
 );
+$server->register('validate',
+        array('token' => 'xsd:string'),
+        array('return' => 'xsd:boolean'),
+        $namespace,
+        $namespace . '#validate',
+        'rpc',
+        'encoded',
+        'Validate whether specified token is from valid session.'
+    );
 
 $HTTP_RAW_POST_DATA = isset($HTTP_RAW_POST_DATA) ? $HTTP_RAW_POST_DATA : '';
 $server->service($HTTP_RAW_POST_DATA);

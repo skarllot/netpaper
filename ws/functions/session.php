@@ -35,3 +35,12 @@ function destroy($token) {
                 $ex->getMessage(), $ex);
     }
 }
+
+function validate($token) {
+    try {
+        \bll\Session::getInstance($token);
+    } catch (Exception $ex) {
+        return FALSE;
+    }
+    return TRUE;
+}
