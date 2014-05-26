@@ -22,3 +22,7 @@ The sequence models was built using PlantUML (refer to .uml files).
 
 ![Logon sequence model](http://goo.gl/Jve5xp)
 
+### Dashboard
+
+![Dashboard sequence model](http://goo.gl/JoS1Z6)
+

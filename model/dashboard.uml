@@ -12,7 +12,7 @@ UI -> WS: getUserInfo
 activate WS
 WS -> Dashboard
 activate Dashboard
-Dashboard -> WS: User name,\nUser full name,\nUser admin status
+Dashboard -> WS: User name,\nUser full name,\nUser admin status,\nUser language
 deactivate Dashboard
 WS -> UI
 deactivate WS
