@@ -85,7 +85,7 @@ class Session
 	}
 
     /**
-     * 
+     * Creates a new session and returns a token.
      * @return \bll\Session
      */
 	public static function create() {
@@ -121,7 +121,7 @@ class Session
     }
 
     /**
-     * 
+     * Destroys the requested session.
      * @return boolean
      */
 	public function destroy() {

@@ -21,11 +21,11 @@
 namespace dal;
 
 /**
- * Represents a row from User table.
+ * Represents a row from Language table.
  *
  * @author Fabrício Godoy <skarllot@gmail.com>
  */
-class UserRow {
+class LanguageRow implements \JsonSerializable {
     /**
      *
      * @var integer
@@ -35,48 +35,25 @@ class UserRow {
      *
      * @var string
      */
-    public $user;
-    /**
-     *
-     * @var string
-     */
-    public $password;
-    /**
-     *
-     * @var string
-     */
-    public $email;
+    public $code;
     /**
      *
      * @var string
      */
     public $name;
-    /**
-     *
-     * @var boolean
-     */
-    public $admin;
-    /**
-     *
-     * @var boolean
-     */
-    public $is_ldap;
-    /**
-     *
-     * @var integer
-     */
-    public $language;
     
     public static function getInstance(array $row) {
-        $ret = new UserRow();
-        $ret->id = $row['id'];
-        $ret->user = $row['user'];
-        $ret->password = $row['password'];
-        $ret->email = $row['email'];
+        $ret = new LanguageRow();
+        $ret->id = ((integer)$row['id']);
+        $ret->code = $row['code'];
         $ret->name = $row['name'];
-        $ret->admin = $row['admin'];
-        $ret->is_ldap = $row['is_ldap'];
-        $ret->language = $row['language'];
         return $ret;
     }
+
+    public function jsonSerialize() {
+        return array('id' => $this->id,
+            'code' => utf8_encode($this->code),
+            'name' => utf8_encode($this->name));
+    }
+
 }

@@ -59,7 +59,15 @@ if ($result instanceof nusoap_fault) {
             'innerError' => NULL))
     );
 } else {
-    echo json_encode(array('result' => $result));
+    $ret = json_encode(array('result' => $result));
+    if (!$ret) {
+        echo json_encode(array('error' =>
+            array('code' => json_last_error(),
+                'message' => json_last_error_msg(),
+                'innerError' => NULL))
+            );
+    }
+    echo $ret;
 }
 
 /*

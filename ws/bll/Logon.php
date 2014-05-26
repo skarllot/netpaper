@@ -25,6 +25,8 @@ require_once 'dal/Connection.php';
 require_once 'dal/UserAdapter.php';
 require_once 'dal/UserRow.php';
 require_once 'dal/LdapAdapter.php';
+require_once 'dal/LanguageAdapter.php';
+require_once 'dal/LanguageRow.php';
 
 /**
  * Logon procedures
@@ -44,6 +46,11 @@ class Logon {
     private $duser;
     /**
      *
+     * @var \dal\LanguageAdapter
+     */
+    private $dlang;
+    /**
+     *
      * @var \dal\LdapAdapter
      */
     private $dldap;
@@ -58,6 +65,7 @@ class Logon {
         $this->conn->connect();
         $this->duser = new \dal\UserAdapter($this->conn);
         $this->dldap = new \dal\LdapAdapter($this->conn);
+        $this->dlang = new \dal\LanguageAdapter($this->conn);
         $this->session = $session;
     }
             
@@ -66,15 +74,27 @@ class Logon {
     }
     
     /**
-     * 
+     * Creates a new login when no other logins exists.
      * @param string $user
      * @param string $password
      * @param string $email
      * @param string $name
+     * @param integer $langid
      * @return boolean
      */
-    function createFirstLogin($user, $password, $email, $name) {
+    function createFirstLogin($user, $password, $email, $name, $langid) {
         if ($this->hasUsers())
+            return FALSE;
+        
+        $langs = $this->dlang->getLanguages();
+        $valid = FALSE;
+        foreach ($langs as $item) {
+            if ($item->id == $langid) {
+                $valid = TRUE;
+                break;
+            }
+        }
+        if (!$valid)
             return FALSE;
         
         $userrow = new \dal\UserRow();
@@ -84,12 +104,12 @@ class Logon {
         $userrow->name = $name;
         $userrow->admin = TRUE;
         $userrow->is_ldap = FALSE;
-        $userrow->language = 1;
+        $userrow->language = $langid;
         return $this->duser->createUser($userrow);
     }
     
     /**
-     * 
+     * Gets a new instance of Logon class.
      * @param \bll\Session $session
      * @return \bll\Logon
      * @throws \bll\InvalidSessionException
@@ -101,10 +121,17 @@ class Logon {
         
         return new Logon($session);
     }
-
+    
+    /**
+     * Get supported languages list.
+     * @return \dal\LanguageRow[]
+     */
+    function getLanguages() {
+        return $this->dlang->getLanguages();
+    }
 
     /**
-     * 
+     * Returns whether has any user registered.
      * @return boolean
      */
     function hasUsers() {
@@ -112,7 +139,7 @@ class Logon {
     }
     
     /**
-     * 
+     * Tries to log on using specified user and password.
      * @param string $user
      * @param string $password
      * @return boolean

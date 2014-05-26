@@ -24,7 +24,7 @@ require_once 'dal/Adapter.php';
 require_once 'dal/UserRow.php';
 
 /**
- * Adapter to connecto to User database table.
+ * Adapter to connect to User database table.
  *
  * @author Fabrício Godoy <skarllot@gmail.com>
  */

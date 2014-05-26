@@ -19,6 +19,14 @@ activate UI
 		deactivate Session
 		WS -> UI
 	deactivate WS
+	UI -> WS: getLanguages
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: Language list
+		deactivate Logon
+		WS -> UI
+	deactivate WS
 	UI -> WS: hasUsers
 	activate WS
 		WS -> Logon
@@ -53,6 +61,14 @@ activate UI
 		activate Session
 		Session -> WS: token
 		deactivate Session
+		WS -> UI
+	deactivate WS
+	UI -> WS: getLanguages
+	activate WS
+		WS -> Logon
+		activate Logon
+		Logon -> WS: Language list
+		deactivate Logon
 		WS -> UI
 	deactivate WS
 	UI -> WS: hasUsers

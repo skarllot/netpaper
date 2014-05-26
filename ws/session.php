@@ -38,7 +38,7 @@ $server->register('create',
     $namespace . '#create',
     'rpc',
     'encoded',
-    'Creates a new session token.'
+    'Creates a new session and returns a token.'
 );
 $server->register('destroy',
     array('token' => 'xsd:string'),

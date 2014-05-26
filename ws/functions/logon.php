@@ -22,11 +22,11 @@ require_once 'lib/nusoap/nusoap.php';
 require_once 'bll/Logon.php';
 require_once 'bll/Session.php';
 
-function createFirstLogin($token, $user, $password, $email, $name) {
+function createFirstLogin($token, $user, $password, $email, $name, $langid) {
     try {
         $session = \bll\Session::getInstance($token);
         $logon = \bll\Logon::getInstance($session);
-        return $logon->createFirstLogin($user, $password, $email, $name);
+        return $logon->createFirstLogin($user, $password, $email, $name, $langid);
     } catch (Exception $ex) {
         return new nusoap_fault($ex->getCode(), 'logon.createFirstLogin',
                 $ex->getMessage(), $ex);
@@ -42,6 +42,18 @@ function doLogon($token, $user, $password) {
         return new nusoap_fault($ex->getCode(), 'logon.doLogon',
                 $ex->getMessage(), $ex);
     }
+}
+
+function getLanguages($token) {
+    try {
+        $session = \bll\Session::getInstance($token);
+        $logon = \bll\Logon::getInstance($session);
+        return $logon->getLanguages();
+    } catch (Exception $ex) {
+        return new nusoap_fault($ex->getCode(), 'logon.getLanguages',
+                $ex->getMessage(), $ex);
+    }
+
 }
 
 function hasUsers($token) {

@@ -21,49 +21,71 @@
 require_once '../lib/nusoap/nusoap.php';
 
 $is_json = False;
-$address = '';
+$address = 'http://localhost/netpaper/ws/%s.php?wsdl';
 
-if (isset($_REQUEST['method'])) {
-    header('Content-type: application/json');
-    extract($_REQUEST);
-    $is_json = True;
-    if (!isset($method) || empty($method))
-        $method = '';
-    if (!isset($token) || empty($token))
-        $token = '';
-    if (!isset($class) || empty($class))
-        $class = '';
+if (!isset($_REQUEST['method']))
+    return;
 
-    switch ($class) {
-        case "session":
-            $address = 'http://localhost/netpaper/ws/session.php?wsdl';
-            switch ($method) {
-                case "create":
-                    callSOAP($method, array());
-                    break;
-                case "destroy":
-                    callSOAP($method, array($token));
-                    break;
-                default:
-                    echo json_encode(array('error' =>
-                        array('code' => NULL,
-                            'message' => 'Invalid parameters supplied',
-                            'innerError' => NULL)));
-                    break;
-            }
-            break;
-        default:
-            echo json_encode(array('error' =>
-                array('code' => NULL,
-                    'message' => 'Invalid class supplied',
-                    'innerError' => NULL)));
-            break;
-    }
+header('Content-type: application/json');
+extract($_REQUEST);
+if (!isset($method) || empty($method))
+    $method = '';
+if (!isset($token) || empty($token))
+    $token = '';
+if (!isset($class) || empty($class))
+    $class = '';
+
+switch ($class) {
+    case "session":
+        $address = sprintf($address, 'session');
+        switch ($method) {
+            case "create":
+                callSOAP($method, array());
+                break;
+            case "destroy":
+                callSOAP($method, array($token));
+                break;
+            default:
+                echo json_encode(array('error' =>
+                    array('code' => NULL,
+                        'message' => 'Invalid parameters supplied',
+                        'innerError' => NULL)));
+                break;
+        }
+        break;
+    case "logon":
+        $address = sprintf($address, 'logon');
+        switch ($method) {
+            case "createFirstLogin":
+                callSOAP($method, array($token, $user, $password, $email, $name));
+                break;
+            case "doLogon":
+                callSOAP($method, array($token, $user, $password));
+                break;
+            case "getLanguages":
+                callSOAP($method, array($token));
+                break;
+            case "hasUsers":
+                callSOAP($method, array($token));
+                break;
+            default:
+                echo json_encode(array('error' =>
+                    array('code' => NULL,
+                        'message' => 'Invalid parameters supplied',
+                        'innerError' => NULL)));
+                break;
+        }
+        break;
+    default:
+        echo json_encode(array('error' =>
+            array('code' => NULL,
+                'message' => 'Invalid class supplied',
+                'innerError' => NULL)));
+        break;
 }
 
 function callSOAP($name, $params) {
     global $address;
-    global $is_json;
 
     $wsdl = $address;
     $client = new soapclient($wsdl, true);
@@ -93,9 +115,16 @@ function callSOAP($name, $params) {
                 'innerError' => NULL)));
         return;
     }
-
-    if ($is_json)
-        echo json_encode(array('result' => $result));
+    
+    $ret = json_encode(array('result' => $result));
+    if (!$ret) {
+        echo json_encode(array('error' =>
+            array('code' => json_last_error(),
+                'message' => json_last_error_msg(),
+                'innerError' => NULL))
+            );
+    }
+    echo $ret;
 
     return $result;
 }

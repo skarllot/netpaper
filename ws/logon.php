@@ -27,16 +27,27 @@ if (isset($_REQUEST['json']) && $_REQUEST['json'] == 1) {
 }
 
 $namespace = 'urn:netpaper:logon';
-$server = new soap_server;
+$server = new nusoap_server;
 $server->configureWSDL('netpaper', $namespace);
 $server->wsdl->schemaTargetNamespace = $namespace;
+
+$server->wsdl->addComplexType('LanguageRow', 'complexType', 'struct', 'all', '',
+		array('id' => array('name' => 'id', 'type' => 'xsd:int'),
+			'code' => array('name' => 'code', 'type' => 'xsd:string'),
+			'name' => array('name' => 'name', 'type' => 'xsd:string'))
+	);
+$server->wsdl->addComplexType('LanguageRowArray', 'complexType', 'array', 'all',
+        'SOAP-ENC:Array', array(), array(array('ref' => 'SOAP-ENC:ArrayType',
+            'wsdl:arrayType' => 'tns:LanguageRow[]'))
+    );
 
 $server->register('createFirstLogin',
     array('token' => 'xsd:string',
         'user' => 'xsd:string',
         'password' => 'xsd:string',
         'email' => 'xsd:string',
-        'name' => 'xsd:string'),
+        'name' => 'xsd:string',
+        'langId' => 'xsd:int'),
     array('return' => 'xsd:boolean'),
     $namespace,
     $namespace . '#createFirstLogin',
@@ -55,6 +66,15 @@ $server->register('doLogon',
     'encoded',
     'Tries to log on using specified user and password.'
 );
+$server->register('getLanguages',
+        array('token' => 'xsd:string'),
+        array('return' => 'tns:LanguageRowArray'),
+        $namespace,
+        $namespace . "#getLanguages",
+        'rpc',
+        'encoded',
+        'Get supported languages list.'
+    );
 $server->register('hasUsers',
     array('token' => 'xsd:string'),
     array('return' => 'xsd:boolean'),

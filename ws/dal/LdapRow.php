@@ -21,7 +21,7 @@
 namespace dal;
 
 /**
- * Description of LdapRow
+ * Represents a row from Ldap table.
  *
  * @author Fabrício Godoy <skarllot@gmail.com>
  */
