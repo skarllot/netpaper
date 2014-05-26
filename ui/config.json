@@ -1,3 +1,1 @@
-{ "configuration": {
-        "ws_url": "http://localhost/netpaper/ws" 
-}}
+{ "ws_url": "http://localhost/netpaper/ws" }
