@@ -79,23 +79,17 @@ class Logon {
      * @param string $password
      * @param string $email
      * @param string $name
-     * @param integer $langid
+     * @param int $langid
      * @return boolean
      */
     function createFirstLogin($user, $password, $email, $name, $langid) {
         if ($this->hasUsers())
             return FALSE;
         
-        $langs = $this->dlang->getLanguages();
-        $valid = FALSE;
-        foreach ($langs as $item) {
-            if ($item->id == $langid) {
-                $valid = TRUE;
-                break;
-            }
-        }
-        if (!$valid)
+        $lang = $this->dlang->getLanguageById($langid);
+        if (!isset($lang)) {
             return FALSE;
+        }
         
         $userrow = new \dal\UserRow();
         $userrow->user = $user;
@@ -146,7 +140,7 @@ class Logon {
      */
     function initialize($user, $password) {
         $this->session->setUser(NULL);
-        $this->session->setIsAdmin(FALSE);
+        $this->session->setLanguage(NULL);
         
         $userrow = $this->duser->getUser($user);
         if (!isset($userrow)) {
@@ -171,9 +165,9 @@ class Logon {
             }
         }
         
-        $this->session->setUser($user);
-        $this->session->setIsAdmin($userrow->admin);
-        $this->session->setLanguage($userrow->language);
+        $lang = $this->dlang->getLanguageById($userrow->language);
+        $this->session->setUser($userrow);
+        $this->session->setLanguage($lang);
         return TRUE;
     }
 

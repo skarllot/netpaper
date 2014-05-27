@@ -34,40 +34,71 @@ class Session
         $this->token = $token;
     }
 
-    public function getIsAdmin() {
-		return (isset($_SESSION['admin']) &&
-			((bool)$_SESSION['admin']));
-	}
-
+    /**
+     * Gets session validation status.
+     * @return boolean
+     */
 	private function getIsValid() {
 		return (isset($_SESSION['VALIDATION_ID']) &&
 			$_SESSION['VALIDATION_ID'] == self::VALIDATION_ID);
 	}
 
+    /**
+     * Gets user language information.
+     * @return \dal\LanguageRow|null
+     */
 	public function getLanguage() {
 		if (!isset($_SESSION['lang']))
 			return -1;
+        if (!($_SESSION['lang'] instanceof \dal\LanguageRow))
+            return NULL;
 		return $_SESSION['lang'];
 	}
     
     /**
-     * 
+     * Gets session token.
      * @return string
      */
     public function getToken() {
         return $this->token;
     }
 
+    /**
+     * Gets user information.
+     * @return \dal\UserRow
+     */
     public function getUser() {
 		if (!isset($_SESSION['user']))
 			return NULL;
+        if (!($_SESSION['user'] instanceof \dal\UserRow))
+            return NULL;
 		return $_SESSION['user'];
 	}
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function hasUser() {
+        return isset($this->getUser());
+    }
+    
+    /**
+     * 
+     * @return boolean
+     */
+    public function isAdminUser() {
+        $user = $this->getUser();
+        if (!isset($user))
+            return FALSE;
+        
+        return $user->admin;
+    }
 
-	public function setIsAdmin($isadmin) {
-		$_SESSION['admin'] = $isadmin;
-	}
-
+    /**
+     * Sets session validation status.
+     * @param boolean $isvalid
+     */
 	private function setIsValid($isvalid) {
 		if ($isvalid) {
 			$_SESSION['VALIDATION_ID'] = self::VALIDATION_ID;
@@ -76,11 +107,19 @@ class Session
         }
 	}
 
-	public function setLanguage($lang) {
+    /**
+     * Sets user language information.
+     * @param \dal\LanguageRow $lang Language information
+     */
+	public function setLanguage(\dal\LanguageRow $lang) {
 		$_SESSION['lang'] = $lang;
 	}
 
-	public function setUser($user) {
+    /**
+     * Sets user information.
+     * @param \dal\UserRow $user User information
+     */
+	public function setUser(\dal\UserRow $user) {
 		$_SESSION['user'] = $user;
 	}
 
@@ -97,7 +136,7 @@ class Session
 	}
 
     /**
-     * 
+     * Gets a new Session instance based on specified token.
      * @param string $token
      * @return \bll\Session
      * @throws InvalidSessionException

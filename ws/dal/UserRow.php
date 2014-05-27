@@ -28,7 +28,7 @@ namespace dal;
 class UserRow {
     /**
      *
-     * @var integer
+     * @var int
      */
     public $id;
     /**
@@ -63,7 +63,7 @@ class UserRow {
     public $is_ldap;
     /**
      *
-     * @var integer
+     * @var int
      */
     public $language;
     

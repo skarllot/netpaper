@@ -28,10 +28,19 @@ require_once 'dal/LanguageRow.php';
  * @author Fabrício Godoy <skarllot@gmail.com>
  */
 class LanguageAdapter extends Adapter {
-    const SQL_GET_LANGUAGES = 'SELECT id, code, name FROM language';
-    
+    const SQL_GET_LANGUAGES = <<<SQL
+            SELECT id, code, name
+                FROM language
+SQL;
+    const SQL_GET_LANGUAGE_BY_ID = <<<SQL
+            SELECT id, code, name
+                FROM language
+                WHERE id = :id
+SQL;
+
+
     /**
-     * 
+     * Gets an array of all available languages.
      * @return \dal\LanguageRow[]
      */
     public function getLanguages() {
@@ -42,5 +51,19 @@ class LanguageAdapter extends Adapter {
             $ret[] = LanguageRow::getInstance($item);
         }
         return $ret;
+    }
+
+    /**
+     * Gets a language information from specified ID.
+     * @param int $id
+     * @return \dal\LanguageRow|null
+     */
+    public function getLanguageById($id) {
+        $rows = $this->conn->query(LanguageAdapter::SQL_GET_LANGUAGE_BY_ID, array(':id' => $id));
+        if (count($rows) != 1) {
+            return NULL;
+        }
+        
+        return LanguageRow::getInstance($rows[0]);
     }
 }
