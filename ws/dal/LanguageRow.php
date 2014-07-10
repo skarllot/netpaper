@@ -25,7 +25,7 @@ namespace dal;
  *
  * @author Fabrício Godoy <skarllot@gmail.com>
  */
-class LanguageRow implements \JsonSerializable {
+class LanguageRow {
     /**
      *
      * @var integer
@@ -48,12 +48,6 @@ class LanguageRow implements \JsonSerializable {
         $ret->code = $row['code'];
         $ret->name = $row['name'];
         return $ret;
-    }
-
-    public function jsonSerialize() {
-        return array('id' => $this->id,
-            'code' => utf8_encode($this->code),
-            'name' => utf8_encode($this->name));
     }
 
 }
