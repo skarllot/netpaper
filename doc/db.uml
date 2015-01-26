@@ -53,8 +53,8 @@ table(user) {
 	-password : varchar[64]
 	-email : varchar[255]
 	-name : varchar[255]
-	-admin : boolean
-	-is_ldap : boolean
+	-isAdmin : boolean
+	-isLdap : boolean
 	+language : int
 }
 

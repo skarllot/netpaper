@@ -25,8 +25,8 @@ type User struct {
 	Password string `db:"password" json:"password"`
 	Email    string `db:"email" json:"email"`
 	Name     string `db:"name" json:"name"`
-	IsAdmin  bool   `db:"admin" json:"isAdmin"`
-	IsLdap   bool   `db:"is_ldap" json:"isLdap"`
+	IsAdmin  bool   `db:"isAdmin" json:"isAdmin"`
+	IsLdap   bool   `db:"isLdap" json:"isLdap"`
 	Language int64  `db:"language" json:"language"`
 }
 
