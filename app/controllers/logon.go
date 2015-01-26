@@ -20,8 +20,8 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/revel/revel"
-	"netpaper/app/dal"
-	"netpaper/app/models"
+	"github.com/skarllot/netpaper/app/dal"
+	"github.com/skarllot/netpaper/app/models"
 )
 
 type LogonCtrl struct {

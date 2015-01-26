@@ -23,7 +23,7 @@ import (
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/revel/revel"
-	"netpaper/app/models"
+	"github.com/skarllot/netpaper/app/models"
 	"strings"
 )
 
