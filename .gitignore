@@ -2,4 +2,5 @@
 *.bak
 /model/*.png
 /model/*.mwb
-/nbproject/private/
+/app/tmp
+/app/routes
