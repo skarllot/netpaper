@@ -1,7 +1,5 @@
-<?php
-
 /*
- * Copyright (C) 2014 Fabrício Godoy <skarllot@gmail.com>
+ * Copyright (C) 2015 Fabrício Godoy <skarllot@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,38 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+package models
 
-namespace bll;
-require_once 'dal/Connection.php';
-require_once 'dal/DBVersionAdapter.php';
+import "github.com/go-gorp/gorp"
 
-/**
- * Migration procedures
- *
- * @author Fabrício Godoy <skarllot@gmail.com>
- */
-class Migration {
-    /**
-     *
-     * @var \dal\Connection
-     */
-    private $conn;
-    
-    function __construct() {
-        $this->conn = new \dal\Connection();
-        $this->conn->connect();
-    }
-    
-    function __destruct() {
-        $this->conn = NULL;
-    }
-    
-    /**
-     * 
-     * @return string
-     */
-    function getVersion() {
-        $adapter = new \dal\DBVersionAdapter($this->conn);
-        return $adapter->getVersion();
-    }
+type User struct {
+	Id       int64  `db:"id" json:"id"`
+	User     string `db:"user" json:"user"`
+	Password string `db:"password" json:"password"`
+	Email    string `db:"email" json:"email"`
+	Name     string `db:"name" json:"name"`
+	IsAdmin  bool   `db:"admin" json:"isAdmin"`
+	IsLdap   bool   `db:"is_ldap" json:"isLdap"`
+	Language int64  `db:"language" json:"language"`
+}
+
+func DefineUserTable(dbm *gorp.DbMap) {
+	t := dbm.AddTableWithName(User{}, "user").SetKeys(true, "id")
+	t.ColMap("user").SetMaxSize(45)
+	t.ColMap("password").SetMaxSize(64)
 }

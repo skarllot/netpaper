@@ -1,7 +1,5 @@
-<?php
-
 /*
- * Copyright (C) 2014 Fabrício Godoy <skarllot@gmail.com>
+ * Copyright (C) 2015 Fabrício Godoy <skarllot@gmail.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,22 +15,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+package controllers
 
-namespace dal;
+import (
+	"encoding/json"
+	"github.com/revel/revel"
+	"netpaper/app/dal"
+	"netpaper/app/models"
+)
 
-/**
- * Class to bridge connection to database.
- *
- * @author Fabrício Godoy <skarllot@gmail.com>
- */
-class Adapter {
-    /**
-     *
-     * @var Connection
-     */
-    protected $conn;
-    
-    public function __construct(Connection $connection) {
-        $this->conn = $connection;
-    }
+type LogonCtrl struct {
+	GorpController
+}
+
+func (c LogonCtrl) parseUser() (models.User, error) {
+	user := models.User{}
+	err := json.NewDecoder(c.Request.Body).Decode(&user)
+	return user, err
+}
+
+func (c LogonCtrl) HasUsers() revel.Result {
+	count, err := dal.UserCount(c.Txn)
+	if count == -1 {
+		revel.ERROR.Fatal(err)
+		return nil
+	}
+	return c.RenderJson(count > 0)
 }

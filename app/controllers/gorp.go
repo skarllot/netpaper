@@ -15,20 +15,54 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package main
+package controllers
 
 import (
-	"fmt"
-	"netpaper/dal"
+	"database/sql"
+	"github.com/go-gorp/gorp"
+	"github.com/revel/revel"
 )
 
-func main() {
-	adapter, err := dal.Create("mysql", "")
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	defer adapter.Close()
+var (
+	Dbm *gorp.DbMap
+)
 
-	fmt.Println("Hello World!")
+type GorpController struct {
+	*revel.Controller
+	Txn *gorp.Transaction
+}
+
+func (c *GorpController) Begin() revel.Result {
+	txn, err := Dbm.Begin()
+	if err != nil {
+		panic(err)
+	}
+	c.Txn = txn
+	return nil
+}
+
+func (c *GorpController) Commit() revel.Result {
+	if c.Txn == nil {
+		return nil
+	}
+
+	err := c.Txn.Commit()
+	if err != nil && err != sql.ErrTxDone {
+		panic(err)
+	}
+	c.Txn = nil
+	return nil
+}
+
+func (c *GorpController) Rollback() revel.Result {
+	if c.Txn == nil {
+		return nil
+	}
+
+	err := c.Txn.Rollback()
+	if err != nil && err != sql.ErrTxDone {
+		panic(err)
+	}
+	c.Txn = nil
+	return nil
 }

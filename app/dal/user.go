@@ -19,23 +19,8 @@ package dal
 
 import (
 	"github.com/go-gorp/gorp"
+	"netpaper/app/models"
 )
-
-type UserAdapter struct {
-	Adapter
-	tmap *gorp.TableMap
-}
-
-type User struct {
-	Id       int
-	User     string
-	Password string
-	Email    string
-	Name     string
-	IsAdmin  bool `db:"admin"`
-	IsLdap   bool `db:"is_ldap"`
-	Language int
-}
 
 const (
 	SQL_CREATE_USER = `INSERT INTO user
@@ -50,14 +35,16 @@ const (
 	SQL_IS_LDAP = `SELECT is_ldap FROM user WHERE user = :user`
 )
 
-func (u *UserAdapter) GetUser(user, password string) (row *User, err error) {
-	var qrows []User
+func GetUser(txn *gorp.Transaction, user string, password string) (*models.User, error) {
+	var qrows []models.User
+	var err error
+
 	if len(password) == 0 {
-		_, err = u.dbmap.Select(&qrows, SQL_GET_USER, map[string]interface{}{
+		_, err = txn.Select(&qrows, SQL_GET_USER, map[string]interface{}{
 			"user": user,
 		})
 	} else {
-		_, err = u.dbmap.Select(&qrows, SQL_GET_USER_WITH_PASSWORD, map[string]interface{}{
+		_, err = txn.Select(&qrows, SQL_GET_USER_WITH_PASSWORD, map[string]interface{}{
 			"user": user,
 			"pass": password,
 		})
@@ -69,9 +56,10 @@ func (u *UserAdapter) GetUser(user, password string) (row *User, err error) {
 	return &qrows[0], err
 }
 
-func Register(a *Adapter) (u *UserAdapter) {
-	u.dbmap = a.dbmap
-	u.tmap = u.dbmap.AddTable(User{})
-	u.tmap.SetKeys(true, "Id")
-	return u
+func UserCount(txn *gorp.Transaction) (int64, error) {
+	count, err := txn.SelectInt(SQL_GET_USER_COUNT)
+	if err != nil {
+		return -1, err
+	}
+	return count, err
 }
