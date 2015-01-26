@@ -23,6 +23,7 @@ import (
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/revel/revel"
+	"github.com/skarllot/netpaper/app/dal"
 	"github.com/skarllot/netpaper/app/models"
 	"strings"
 )
@@ -76,9 +77,20 @@ var InitDb func() = func() {
 			Dialect: gorp.MySQLDialect{"InnoDB", "UTF8"}}
 	}
 
+	models.DefineLanguageTable(Dbm)
+	models.DefineSessionTable(Dbm)
 	models.DefineUserTable(Dbm)
 	err = Dbm.CreateTablesIfNotExists()
 	if err != nil {
 		revel.ERROR.Fatal(err)
 	}
+
+	txn, err := Dbm.Begin()
+	if err != nil {
+		revel.ERROR.Fatal(err)
+	}
+	if c, _ := dal.LanguageCount(txn); c < 1 {
+		models.InitLanguageTable(Dbm)
+	}
+	txn.Commit()
 }

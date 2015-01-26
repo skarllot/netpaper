@@ -20,18 +20,43 @@ package models
 import "github.com/go-gorp/gorp"
 
 type User struct {
-	Id       int64  `db:"id" json:"id"`
-	User     string `db:"user" json:"user"`
-	Password string `db:"password" json:"password"`
-	Email    string `db:"email" json:"email"`
-	Name     string `db:"name" json:"name"`
-	IsAdmin  bool   `db:"isAdmin" json:"isAdmin"`
-	IsLdap   bool   `db:"isLdap" json:"isLdap"`
-	Language int64  `db:"language" json:"language"`
+	Id         int64  `db:"id" json:"id"`
+	User       string `db:"user" json:"user"`
+	Password   string `db:"password" json:"password"`
+	Email      string `db:"email" json:"email"`
+	Name       string `db:"name" json:"name"`
+	IsAdmin    bool   `db:"is_admin" json:"isAdmin"`
+	IsLdap     bool   `db:"is_ldap" json:"isLdap"`
+	LanguageId int64  `db:"language" json:"-"`
+
+	Language *Language `db:"-" json:"language"`
 }
 
 func DefineUserTable(dbm *gorp.DbMap) {
-	t := dbm.AddTableWithName(User{}, "user").SetKeys(true, "id")
-	t.ColMap("user").SetMaxSize(45)
+	t := dbm.AddTableWithName(User{}, "user")
+	t.SetKeys(true, "id")
+	t.ColMap("user").SetMaxSize(45).SetNotNull(true)
 	t.ColMap("password").SetMaxSize(64)
+	t.ColMap("name").SetNotNull(true)
+	t.ColMap("is_admin").SetNotNull(true)
+	t.ColMap("is_ldap").SetNotNull(true)
+	t.ColMap("language").SetNotNull(true)
+}
+
+func (u *User) PreInsert(_ gorp.SqlExecutor) error {
+	u.LanguageId = u.Language.Id
+	return nil
+}
+
+func (u *User) PostGet(exe gorp.SqlExecutor) error {
+	var obj interface{}
+	var err error
+
+	obj, err = exe.Get(Language{}, u.LanguageId)
+	if err != nil {
+		return err
+	}
+	u.Language = obj.(*Language)
+
+	return nil
 }
