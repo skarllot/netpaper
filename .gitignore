@@ -1,6 +1,5 @@
 *~
 *.bak
-/model/*.png
-/model/*.mwb
+/doc/*.png
 /app/tmp
 /app/routes
