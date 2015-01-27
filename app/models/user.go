@@ -17,17 +17,20 @@
  */
 package models
 
-import "github.com/go-gorp/gorp"
+import (
+	"database/sql"
+	"github.com/go-gorp/gorp"
+)
 
 type User struct {
-	Id         int64  `db:"id" json:"id"`
-	User       string `db:"user" json:"user"`
-	Password   string `db:"password" json:"password"`
-	Email      string `db:"email" json:"email"`
-	Name       string `db:"name" json:"name"`
-	IsAdmin    bool   `db:"is_admin" json:"isAdmin"`
-	IsLdap     bool   `db:"is_ldap" json:"isLdap"`
-	LanguageId int64  `db:"language" json:"-"`
+	Id         int64          `db:"id" json:"id"`
+	User       string         `db:"user" json:"user"`
+	Password   sql.NullString `db:"password" json:"password"`
+	Email      sql.NullString `db:"email" json:"email"`
+	Name       string         `db:"name" json:"name"`
+	IsAdmin    bool           `db:"is_admin" json:"isAdmin"`
+	IsLdap     bool           `db:"is_ldap" json:"isLdap"`
+	LanguageId int64          `db:"language" json:"-"`
 
 	Language *Language `db:"-" json:"language"`
 }

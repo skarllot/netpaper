@@ -18,18 +18,19 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/go-gorp/gorp"
 	"time"
 )
 
 type Session struct {
-	Id         int64     `db:"id" json:"id"`
-	UserId     int64     `db:"user" json:"-"`
-	AuthToken  string    `db:"auth_token" json:"authToken"`
-	IpAddress  string    `db:"ipaddress" json:"ipAddress"`
-	Ip6Address string    `db:"ip6address" json:"ip6Address"`
-	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt  time.Time `db:"updated_at" json:"updatedAt"`
+	Id         int64          `db:"id" json:"id"`
+	UserId     int64          `db:"user" json:"-"`
+	AuthToken  string         `db:"auth_token" json:"authToken"`
+	IpAddress  sql.NullString `db:"ipaddress" json:"ipAddress"`
+	Ip6Address sql.NullString `db:"ip6address" json:"ip6Address"`
+	CreatedAt  time.Time      `db:"created_at" json:"createdAt"`
+	UpdatedAt  time.Time      `db:"updated_at" json:"updatedAt"`
 
 	User *User `db:"-" json:"user"`
 }

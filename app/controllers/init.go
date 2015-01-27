@@ -35,27 +35,14 @@ func init() {
 	revel.InterceptMethod((*GorpController).Rollback, revel.FINALLY)
 }
 
-func getParamString(param, defaultValue string) string {
-	p, found := revel.Config.String(param)
-	if !found {
-		if len(defaultValue) == 0 {
-			revel.ERROR.Fatal("Could not find parameter: " + param)
-		} else {
-			return defaultValue
-		}
-	}
-
-	return p
-}
-
 func getConnectionString() string {
-	host := getParamString("db.host", "")
-	port := getParamString("db.port", "3306")
-	user := getParamString("db.user", "")
-	pass := getParamString("db.password", "")
-	dbname := getParamString("db.name", "netpaper")
-	protocol := getParamString("db.protocol", "tcp")
-	dbargs := getParamString("db.args", " ")
+	host := revel.Config.StringDefault("db.host", "")
+	port := revel.Config.StringDefault("db.port", "3306")
+	user := revel.Config.StringDefault("db.user", "")
+	pass := revel.Config.StringDefault("db.password", "")
+	dbname := revel.Config.StringDefault("db.name", "netpaper")
+	protocol := revel.Config.StringDefault("db.protocol", "tcp")
+	dbargs := revel.Config.StringDefault("db.args", " ")
 
 	if len(strings.Trim(dbargs, " ")) > 0 {
 		dbargs = "?" + dbargs
