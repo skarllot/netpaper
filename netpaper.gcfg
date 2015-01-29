@@ -1,0 +1,6 @@
+[Database]
+engine=mysql
+host=localhost
+name=netpaper
+user=netpaper
+password=qNxhh3KJxJKPK9ff

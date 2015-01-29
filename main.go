@@ -15,21 +15,40 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package dal
+package main
 
 import (
-	"github.com/go-gorp/gorp"
-	//"github.com/skarllot/netpaper/app/models"
+	"fmt"
+	"github.com/gorilla/context"
+	"github.com/justinas/alice"
+	"github.com/skarllot/netpaper/config"
+	"net/http"
+	"runtime"
 )
 
-const (
-	SQL_GET_LANGUAGE_COUNT = `SELECT count(id) AS count FROM language`
-)
+func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
-func LanguageCount(txn *gorp.Transaction) (int64, error) {
-	count, err := txn.SelectInt(SQL_GET_LANGUAGE_COUNT)
-	if err != nil {
-		return -1, err
+	cfg := config.Configuration{}
+	if err := cfg.Load("netpaper.gcfg"); err != nil {
+		fmt.Println("Could not load configuration file:", err)
+		return
 	}
-	return count, err
+	cnxStr, err := cfg.GetConnectionString()
+	if err != nil {
+		fmt.Println("Could not determine database connection string:", err)
+		return
+	}
+
+	appC := appContext{}
+	err = appC.InitDb(cfg.Database.Engine, cnxStr)
+	if err != nil {
+		fmt.Println("Could not initialize database:", err)
+		return
+	}
+
+	commonHandlers := alice.New(context.ClearHandler)
+	router := NewRouter()
+	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(appC.HasUsers))
+	http.ListenAndServe(":8080", router.httpRouter)
 }

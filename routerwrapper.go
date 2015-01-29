@@ -15,54 +15,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package controllers
+package main
 
 import (
-	"database/sql"
-	"github.com/go-gorp/gorp"
-	"github.com/revel/revel"
+	"github.com/gorilla/context"
+	"github.com/julienschmidt/httprouter"
+	"net/http"
 )
 
-var (
-	Dbm *gorp.DbMap
-)
-
-type GorpController struct {
-	*revel.Controller
-	Txn *gorp.Transaction
+type routerWrapper struct {
+	httpRouter *httprouter.Router
 }
 
-func (c *GorpController) Begin() revel.Result {
-	txn, err := Dbm.Begin()
-	if err != nil {
-		panic(err)
-	}
-	c.Txn = txn
-	return nil
+func (r *routerWrapper) Get(path string, handler http.Handler) {
+	r.httpRouter.GET(path, wrapHandler(handler))
 }
 
-func (c *GorpController) Commit() revel.Result {
-	if c.Txn == nil {
-		return nil
-	}
-
-	err := c.Txn.Commit()
-	if err != nil && err != sql.ErrTxDone {
-		panic(err)
-	}
-	c.Txn = nil
-	return nil
+func NewRouter() *routerWrapper {
+	return &routerWrapper{httprouter.New()}
 }
 
-func (c *GorpController) Rollback() revel.Result {
-	if c.Txn == nil {
-		return nil
+func wrapHandler(h http.Handler) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		context.Set(r, "params", ps)
+		h.ServeHTTP(w, r)
 	}
-
-	err := c.Txn.Rollback()
-	if err != nil && err != sql.ErrTxDone {
-		panic(err)
-	}
-	c.Txn = nil
-	return nil
 }
