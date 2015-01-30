@@ -15,32 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package models
+package dal
 
-import "github.com/go-gorp/gorp"
+import (
+	"github.com/go-gorp/gorp"
+	"github.com/skarllot/netpaper/models"
+)
 
-type Language struct {
-	Id   int64  `db:"id" json:"id"`
-	Code string `db:"code" json:"code"`
-	Name string `db:"name" json:"name"`
-}
-
-func DefineLanguageTable(dbm *gorp.DbMap) {
-	t := dbm.AddTableWithName(Language{}, "language")
-	t.SetKeys(true, "id")
-	t.ColMap("code").SetMaxSize(5).SetNotNull(true)
-	t.ColMap("name").SetMaxSize(45).SetNotNull(true)
-}
-
-func InitLanguageTable(txn *gorp.Transaction) {
-	languages := []*Language{
-		&Language{0, "en-US", "English (Default)"},
-		&Language{0, "pt-BR", "Português (Brasil)"},
+func InitModels(dbm *gorp.DbMap) error {
+	models.DefineAllTables(dbm)
+	if err := dbm.CreateTablesIfNotExists(); err != nil {
+		return err
 	}
 
-	for _, l := range languages {
-		if err := txn.Insert(l); err != nil {
-			panic(err)
-		}
+	txn, err := dbm.Begin()
+	if err != nil {
+		return err
 	}
+	if num, _ := LanguageCount(txn); num < 1 {
+		models.InitLanguageTable(txn)
+	}
+	txn.Commit()
+	return nil
 }

@@ -15,32 +15,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package models
+package bll
 
-import "github.com/go-gorp/gorp"
+import (
+	"encoding/json"
+	"github.com/skarllot/netpaper/dal"
+	"net/http"
+)
 
-type Language struct {
-	Id   int64  `db:"id" json:"id"`
-	Code string `db:"code" json:"code"`
-	Name string `db:"name" json:"name"`
+type Logon struct {
+	Context *AppContext
 }
 
-func DefineLanguageTable(dbm *gorp.DbMap) {
-	t := dbm.AddTableWithName(Language{}, "language")
-	t.SetKeys(true, "id")
-	t.ColMap("code").SetMaxSize(5).SetNotNull(true)
-	t.ColMap("name").SetMaxSize(45).SetNotNull(true)
-}
+func (l *Logon) HasUsers(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var count int64
 
-func InitLanguageTable(txn *gorp.Transaction) {
-	languages := []*Language{
-		&Language{0, "en-US", "English (Default)"},
-		&Language{0, "pt-BR", "Português (Brasil)"},
+	l.Context.txn, err = l.Context.dbm.Begin()
+	if err != nil {
+		return
 	}
 
-	for _, l := range languages {
-		if err := txn.Insert(l); err != nil {
-			panic(err)
-		}
+	count, err = dal.UserCount(l.Context.txn)
+	if err != nil {
+		l.Context.txn.Rollback()
+		l.Context.txn = nil
+		return
 	}
+	json.NewEncoder(w).Encode(count > 0)
+	l.Context.txn.Commit()
+	l.Context.txn = nil
 }

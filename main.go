@@ -21,9 +21,12 @@ import (
 	"fmt"
 	"github.com/gorilla/context"
 	"github.com/justinas/alice"
+	"github.com/skarllot/netpaper/bll"
 	"github.com/skarllot/netpaper/config"
+	"log"
 	"net/http"
 	"runtime"
+	"time"
 )
 
 func main() {
@@ -40,17 +43,30 @@ func main() {
 		return
 	}
 
-	appC := appContext{}
+	appC := bll.AppContext{}
 	err = appC.InitDb(cfg.Database.Engine, cnxStr)
 	if err != nil {
 		fmt.Println("Could not initialize database:", err)
 		return
 	}
 
-	commonHandlers := alice.New(context.ClearHandler, recoverHandler)
+	logon := bll.Logon{&appC}
+
+	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
 	router := NewRouter()
-	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(appC.HasUsers))
+	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(logon.HasUsers))
 	http.ListenAndServe(":8080", router.httpRouter)
+}
+
+func loggingHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		t1 := time.Now()
+		next.ServeHTTP(w, r)
+		t2 := time.Now()
+		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
+	}
+
+	return http.HandlerFunc(fn)
 }
 
 func recoverHandler(next http.Handler) http.Handler {
