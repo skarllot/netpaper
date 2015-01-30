@@ -24,11 +24,13 @@ import (
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skarllot/netpaper/dal"
+	"time"
 )
 
 type AppContext struct {
-	dbm *gorp.DbMap
-	txn *gorp.Transaction
+	dbm   *gorp.DbMap
+	txn   *gorp.Transaction
+	token *TokenStore
 }
 
 func (c *AppContext) InitDb(engine, connectionString string) error {
@@ -53,5 +55,10 @@ func (c *AppContext) InitDb(engine, connectionString string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (c *AppContext) InitTokenStore(salt string) error {
+	c.token = (&TokenStore{}).New(time.Minute*30, salt)
 	return nil
 }

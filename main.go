@@ -22,7 +22,6 @@ import (
 	"github.com/gorilla/context"
 	"github.com/justinas/alice"
 	"github.com/skarllot/netpaper/bll"
-	"github.com/skarllot/netpaper/config"
 	"log"
 	"net/http"
 	"runtime"
@@ -32,12 +31,12 @@ import (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	cfg := config.Configuration{}
+	cfg := bll.Configuration{}
 	if err := cfg.Load("netpaper.gcfg"); err != nil {
 		fmt.Println("Could not load configuration file:", err)
 		return
 	}
-	cnxStr, err := cfg.GetConnectionString()
+	cnxStr, err := cfg.Database.GetConnectionString()
 	if err != nil {
 		fmt.Println("Could not determine database connection string:", err)
 		return
@@ -49,11 +48,19 @@ func main() {
 		fmt.Println("Could not initialize database:", err)
 		return
 	}
+	err = appC.InitTokenStore(cfg.Security.Salt)
+	if err != nil {
+		fmt.Println("Could not initialize token store:", err)
+		return
+	}
 
 	logon := bll.Logon{&appC}
+	session := bll.Session{&appC}
 
 	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
 	router := NewRouter()
+	router.Get("/session/create", commonHandlers.ThenFunc(session.Create))
+	router.Get("/logon/doLogon", commonHandlers.ThenFunc(logon.DoLogon))
 	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(logon.HasUsers))
 	http.ListenAndServe(":8080", router.httpRouter)
 }

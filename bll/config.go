@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package config
+package bll
 
 import (
 	"code.google.com/p/gcfg"
@@ -28,6 +28,7 @@ import (
 
 type Configuration struct {
 	Database
+	Security
 }
 
 type Database struct {
@@ -39,6 +40,10 @@ type Database struct {
 	Password string
 	Protocol string
 	DbArgs   string
+}
+
+type Security struct {
+	Salt string
 }
 
 func (c *Configuration) Load(path string) error {
@@ -55,6 +60,9 @@ func (c *Configuration) loadDefaults() {
 	c.Database.Password = ""
 	c.Database.Protocol = "tcp"
 	c.Database.DbArgs = ""
+
+	c.Security.Salt = "tlUi5qmMvq8tG/09+qBDHkbGoAMyK0FxDXIUWI2Z24bTatgNxHRWcm" +
+		"vtZfymm6YjOR5NiXBf9y0eyaqW+misFp0+UPHUNvwPHY2+caCOseXZ"
 }
 
 func (c *Configuration) LoadJson(path string) error {
