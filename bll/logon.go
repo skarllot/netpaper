@@ -20,7 +20,6 @@ package bll
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"github.com/skarllot/netpaper/dal"
 	"net/http"
 	"strings"
@@ -69,9 +68,8 @@ func (l *Logon) HasUsers(w http.ResponseWriter, r *http.Request) {
 		l.Context.txn = nil
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(count > 0)
 	l.Context.txn.Commit()
 	l.Context.txn = nil
+
+	(JsonResponse{count > 0}).Write(w)
 }

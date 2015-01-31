@@ -18,9 +18,8 @@
 package bll
 
 import (
-	"encoding/json"
-	//"github.com/gorilla/context"
-	//"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/context"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
@@ -29,8 +28,27 @@ type Session struct {
 }
 
 func (s *Session) Create(w http.ResponseWriter, r *http.Request) {
-	//params := context.Get(r, "params").(httprouter.Params)
 	token := s.Context.token.NewToken()
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
+
+	(JsonResponse{token}).Write(w)
+}
+
+func (s *Session) Destroy(w http.ResponseWriter, r *http.Request) {
+	params := context.Get(r, "params").(httprouter.Params)
+	//token := context.Get(r, "token").(string)
+	err := s.Context.token.RemoveToken(params.ByName("token"))
+
+	if err == nil {
+		(JsonResponse{true}).Write(w)
+	} else {
+		(JsonError{err.Error()}).Write(w)
+	}
+}
+
+func (s *Session) Validate(w http.ResponseWriter, r *http.Request) {
+	params := context.Get(r, "params").(httprouter.Params)
+	//token := context.Get(r, "token").(string)
+	_, err := s.Context.token.GetValue(params.ByName("token"))
+
+	(JsonResponse{err == nil}).Write(w)
 }

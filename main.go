@@ -25,7 +25,7 @@ import (
 	"log"
 	"net/http"
 	"runtime"
-	"time"
+	"strconv"
 )
 
 func main() {
@@ -36,19 +36,15 @@ func main() {
 		fmt.Println("Could not load configuration file:", err)
 		return
 	}
-	cnxStr, err := cfg.Database.GetConnectionString()
-	if err != nil {
-		fmt.Println("Could not determine database connection string:", err)
-		return
-	}
 
 	appC := bll.AppContext{}
-	err = appC.InitDb(cfg.Database.Engine, cnxStr)
+	appC.SetConfiguration(&cfg)
+	err := appC.InitDb()
 	if err != nil {
 		fmt.Println("Could not initialize database:", err)
 		return
 	}
-	err = appC.InitTokenStore(cfg.Security.Salt)
+	err = appC.InitTokenStore()
 	if err != nil {
 		fmt.Println("Could not initialize token store:", err)
 		return
@@ -57,23 +53,17 @@ func main() {
 	logon := bll.Logon{&appC}
 	session := bll.Session{&appC}
 
-	commonHandlers := alice.New(context.ClearHandler, loggingHandler, recoverHandler)
+	commonHandlers := alice.New(context.ClearHandler, appC.LoggingHandler, recoverHandler)
 	router := NewRouter()
 	router.Get("/session/create", commonHandlers.ThenFunc(session.Create))
+	router.Get("/session/destroy/:token", commonHandlers.ThenFunc(session.Destroy))
+	router.Get("/session/validate/:token", commonHandlers.ThenFunc(session.Validate))
 	router.Get("/logon/doLogon", commonHandlers.ThenFunc(logon.DoLogon))
 	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(logon.HasUsers))
-	http.ListenAndServe(":8080", router.httpRouter)
-}
-
-func loggingHandler(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		t1 := time.Now()
-		next.ServeHTTP(w, r)
-		t2 := time.Now()
-		log.Printf("[%s] %q %v\n", r.Method, r.URL.String(), t2.Sub(t1))
-	}
-
-	return http.HandlerFunc(fn)
+	fmt.Println("HTTP server listening on port", cfg.Application.Port)
+	http.ListenAndServe(
+		":"+strconv.Itoa(int(cfg.Application.Port)),
+		router.httpRouter)
 }
 
 func recoverHandler(next http.Handler) http.Handler {

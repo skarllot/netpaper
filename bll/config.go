@@ -19,16 +19,22 @@ package bll
 
 import (
 	"code.google.com/p/gcfg"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strconv"
+	"time"
 )
 
 type Configuration struct {
+	Application
 	Database
-	Security
+}
+
+type Application struct {
+	Port          uint16
+	Secret        string
+	TokenLife     string
+	AuthTokenLife string
 }
 
 type Database struct {
@@ -42,13 +48,17 @@ type Database struct {
 	DbArgs   string
 }
 
-type Security struct {
-	Salt string
-}
-
 func (c *Configuration) Load(path string) error {
 	c.loadDefaults()
-	return gcfg.ReadFileInto(c, path)
+	err := gcfg.ReadFileInto(c, path)
+	if err == nil &&
+		c.Application.GetTokenLifeDuration() == 0 &&
+		c.Application.GetAuthTokenLifeDuration() == 0 {
+		err = errors.New(fmt.Sprintf(
+			"The value '%s' for TokenLife duration is invalid",
+			c.Application.TokenLife))
+	}
+	return err
 }
 
 func (c *Configuration) loadDefaults() {
@@ -61,35 +71,26 @@ func (c *Configuration) loadDefaults() {
 	c.Database.Protocol = "tcp"
 	c.Database.DbArgs = ""
 
-	c.Security.Salt = "tlUi5qmMvq8tG/09+qBDHkbGoAMyK0FxDXIUWI2Z24bTatgNxHRWcm" +
-		"vtZfymm6YjOR5NiXBf9y0eyaqW+misFp0+UPHUNvwPHY2+caCOseXZ"
+	c.Application.Port = 8080
+	c.Application.Secret = "tlUi5qmMvq8tG/09+qBDHkbGoAMyK0FxDXIUWI2Z24bTatgNx" +
+		"HRWcmvtZfymm6YjOR5NiXBf9y0eyaqW+misFp0+UPHUNvwPHY2+caCOseXZ"
+	c.Application.TokenLife = "1m"
 }
 
-func (c *Configuration) LoadJson(path string) error {
-	c.loadDefaults()
-	b, err := ioutil.ReadFile(path)
+func (app *Application) GetAuthTokenLifeDuration() time.Duration {
+	d, err := time.ParseDuration(app.AuthTokenLife)
 	if err != nil {
-		return err
+		return 0
 	}
-	err = json.Unmarshal(b, c)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d
 }
 
-func (c *Configuration) SaveJson(path string) error {
-	b, err := json.MarshalIndent(c, "", "  ")
+func (app *Application) GetTokenLifeDuration() time.Duration {
+	d, err := time.ParseDuration(app.TokenLife)
 	if err != nil {
-		return err
+		return 0
 	}
-	err = ioutil.WriteFile(path, b, 0664)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return d
 }
 
 func (db *Database) GetConnectionString() (string, error) {

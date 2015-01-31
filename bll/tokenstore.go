@@ -23,27 +23,39 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 type TokenStore struct {
 	*TimedStore
-	salt string
+	salt         string
+	authDuration time.Duration
+}
+
+func (s *TokenStore) Count() int {
+	return len(s.items)
+}
+
+func (s *TokenStore) getInvalidTokenError(token string) error {
+	return errors.New(fmt.Sprintf(
+		"The requested token '%s' is invalid or is expired", token))
 }
 
 func (s *TokenStore) GetValue(token string) (interface{}, error) {
 	v, err := s.GetItem(token)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("The requested token '%s' is invalid or is expired"))
+		return nil, s.getInvalidTokenError(token)
 	}
 	return v, err
 }
 
-func (s *TokenStore) New(d time.Duration, salt string) *TokenStore {
-	ts := (&TimedStore{}).New(d)
+func (s *TokenStore) New(noAuth, auth time.Duration, salt string) *TokenStore {
+	ts := (&TimedStore{}).New(noAuth)
 	return &TokenStore{
 		ts,
 		salt,
+		auth,
 	}
 }
 
@@ -52,6 +64,7 @@ func (s *TokenStore) NewToken() string {
 	now := time.Now().Format(time.ANSIC)
 
 	hash.Write([]byte(now))
+	hash.Write([]byte(strconv.Itoa(time.Now().Nanosecond())))
 	hash.Write([]byte(s.salt))
 	hash.Write(getRandomBytes(32 + time.Now().Second()))
 	strSum := base64.URLEncoding.EncodeToString(hash.Sum(nil))
@@ -61,10 +74,26 @@ func (s *TokenStore) NewToken() string {
 	return strSum
 }
 
+func (s *TokenStore) RemoveToken(token string) error {
+	err := s.RemoveItem(token)
+	if err != nil {
+		return s.getInvalidTokenError(token)
+	}
+	return nil
+}
+
+func (s *TokenStore) SetTokenAsAuthenticated(token string) error {
+	err := s.SetItemDuration(token, s.authDuration)
+	if err != nil {
+		return s.getInvalidTokenError(token)
+	}
+	return nil
+}
+
 func (s *TokenStore) SetValue(token string, value interface{}) error {
 	err := s.SetItem(token, value)
 	if err != nil {
-		return errors.New(fmt.Sprintf("The requested token '%s' is invalid or is expired"))
+		return s.getInvalidTokenError(token)
 	}
 	return nil
 }

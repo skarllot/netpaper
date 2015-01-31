@@ -1,3 +1,9 @@
+[Application]
+Port=8080
+Secret=37V/hSgxosDQkIok7OezSHZ4VP2/62DrnToKJRrbEyitpLd4S8Uk3qlFrcNncixi0soi
+TokenLife=1m
+AuthTokenLife=5m
+
 [Database]
 engine=mysql
 host=localhost

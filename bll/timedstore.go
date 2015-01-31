@@ -31,12 +31,13 @@ type TimedStore struct {
 }
 
 type TimedItem struct {
-	ExpireAt time.Time
-	Value    interface{}
+	expireAt time.Time
+	duration time.Duration
+	value    interface{}
 }
 
 func (i *TimedItem) IsExpired() bool {
-	return time.Now().After(i.ExpireAt)
+	return time.Now().After(i.expireAt)
 }
 
 func (s *TimedStore) New(d time.Duration) *TimedStore {
@@ -48,9 +49,11 @@ func (s *TimedStore) New(d time.Duration) *TimedStore {
 }
 
 func (s *TimedStore) NewItem(id string, value interface{}) *TimedItem {
+	s.removeExpired()
 	i := &TimedItem{
-		ExpireAt: time.Now().Add(s.duration),
-		Value:    value,
+		expireAt: time.Now().Add(s.duration),
+		duration: 0,
+		value:    value,
 	}
 
 	s.mutex.Lock()
@@ -70,8 +73,16 @@ func (s *TimedStore) GetItem(id string) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	v.ExpireAt = time.Now()
-	return v.Value, nil
+	s.refreshItem(v)
+	return v.value, nil
+}
+
+func (s *TimedStore) refreshItem(i *TimedItem) {
+	d := s.duration
+	if i.duration != 0 {
+		d = i.duration
+	}
+	i.expireAt = time.Now().Add(d)
 }
 
 func (s *TimedStore) removeExpired() {
@@ -85,6 +96,21 @@ func (s *TimedStore) removeExpired() {
 	}
 }
 
+func (s *TimedStore) RemoveItem(id string) error {
+	s.removeExpired()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	_, err := s.unsafeGet(id)
+	if err != nil {
+		return err
+	}
+
+	delete(s.items, id)
+	return nil
+}
+
 func (s *TimedStore) SetItem(id string, value interface{}) error {
 	s.removeExpired()
 
@@ -96,8 +122,24 @@ func (s *TimedStore) SetItem(id string, value interface{}) error {
 		return err
 	}
 
-	v.ExpireAt = time.Now()
-	v.Value = value
+	s.refreshItem(v)
+	v.value = value
+	return nil
+}
+
+func (s *TimedStore) SetItemDuration(id string, d time.Duration) error {
+	s.removeExpired()
+
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	v, err := s.unsafeGet(id)
+	if err != nil {
+		return err
+	}
+
+	v.expireAt = time.Now().Add(d)
+	v.duration = d
 	return nil
 }
 

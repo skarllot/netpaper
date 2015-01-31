@@ -24,20 +24,29 @@ import (
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/skarllot/netpaper/dal"
+	"log"
+	"net/http"
 	"time"
 )
 
 type AppContext struct {
-	dbm   *gorp.DbMap
-	txn   *gorp.Transaction
-	token *TokenStore
+	config *Configuration
+	dbm    *gorp.DbMap
+	txn    *gorp.Transaction
+	token  *TokenStore
 }
 
-func (c *AppContext) InitDb(engine, connectionString string) error {
+func (c *AppContext) InitDb() error {
 	var db *sql.DB
+	var cnxStr string
 	var err error
 
-	if db, err = sql.Open(engine, connectionString); err != nil {
+	engine := c.config.Database.Engine
+	cnxStr, err = c.config.Database.GetConnectionString()
+	if err != nil {
+		return err
+	}
+	if db, err = sql.Open(engine, cnxStr); err != nil {
 		return err
 	}
 
@@ -58,7 +67,26 @@ func (c *AppContext) InitDb(engine, connectionString string) error {
 	return nil
 }
 
-func (c *AppContext) InitTokenStore(salt string) error {
-	c.token = (&TokenStore{}).New(time.Minute*30, salt)
+func (c *AppContext) InitTokenStore() error {
+	c.token = (&TokenStore{}).New(
+		c.config.Application.GetTokenLifeDuration(),
+		c.config.Application.GetAuthTokenLifeDuration(),
+		c.config.Application.Secret)
 	return nil
+}
+
+func (c *AppContext) LoggingHandler(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		t1 := time.Now()
+		next.ServeHTTP(w, r)
+		t2 := time.Now()
+		log.Printf("[%s] %q %v (%d tokens)\n",
+			r.Method, r.URL.String(), t2.Sub(t1), c.token.Count())
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+func (c *AppContext) SetConfiguration(cfg *Configuration) {
+	c.config = cfg
 }
