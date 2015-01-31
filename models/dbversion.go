@@ -23,14 +23,18 @@ type DbVersion struct {
 	Value string `db:"value" json:"value"`
 }
 
+const (
+	CURRENT_DB_VERSION = "0.1"
+)
+
 func DefineDbVersionTable(dbm *gorp.DbMap) {
 	t := dbm.AddTableWithName(DbVersion{}, "dbversion")
 	t.ColMap("value").SetMaxSize(9).SetNotNull(true)
 }
 
-func InitDbVersionTable(dbm *gorp.DbMap) {
-	version := &DbVersion{"0.1"}
-	if err := dbm.Insert(version); err != nil {
+func InitDbVersionTable(txn *gorp.Transaction) {
+	version := &DbVersion{CURRENT_DB_VERSION}
+	if err := txn.Insert(version); err != nil {
 		panic(err)
 	}
 }

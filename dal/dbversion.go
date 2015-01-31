@@ -19,7 +19,7 @@ package dal
 
 import (
 	"github.com/go-gorp/gorp"
-	"github.com/skarllot/netpaper/app/models"
+	"github.com/skarllot/netpaper/models"
 )
 
 const (

@@ -32,9 +32,26 @@ func InitModels(dbm *gorp.DbMap) error {
 	if err != nil {
 		return err
 	}
-	if num, _ := LanguageCount(txn); num < 1 {
+	var num int64
+
+	num, err = DbVersionCount(txn)
+	if err != nil {
+		txn.Rollback()
+		return err
+	}
+	if num < 1 {
+		models.InitDbVersionTable(txn)
+	}
+
+	num, err = LanguageCount(txn)
+	if err != nil {
+		txn.Rollback()
+		return err
+	}
+	if num < 1 {
 		models.InitLanguageTable(txn)
 	}
+
 	txn.Commit()
 	return nil
 }

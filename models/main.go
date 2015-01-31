@@ -20,6 +20,7 @@ package models
 import "github.com/go-gorp/gorp"
 
 func DefineAllTables(dbm *gorp.DbMap) {
+	DefineDbVersionTable(dbm)
 	DefineUserTable(dbm)
 	DefineLanguageTable(dbm)
 	DefineSessionTable(dbm)
