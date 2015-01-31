@@ -15,30 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-package controllers
+package dal
 
 import (
-	"encoding/json"
-	"github.com/revel/revel"
-	"github.com/skarllot/netpaper/app/dal"
-	"github.com/skarllot/netpaper/app/models"
+	"github.com/go-gorp/gorp"
+	"github.com/skarllot/netpaper/models"
 )
 
-type LogonCtrl struct {
-	GorpController
-}
-
-func (c LogonCtrl) parseUser() (models.User, error) {
-	user := models.User{}
-	err := json.NewDecoder(c.Request.Body).Decode(&user)
-	return user, err
-}
-
-func (c LogonCtrl) HasUsers() revel.Result {
-	count, err := dal.UserCount(c.Txn)
-	if count == -1 {
-		revel.ERROR.Fatal(err)
-		return nil
+func InitModels(dbm *gorp.DbMap) error {
+	models.DefineAllTables(dbm)
+	if err := dbm.CreateTablesIfNotExists(); err != nil {
+		return err
 	}
-	return c.RenderJson(count > 0)
+
+	txn, err := dbm.Begin()
+	if err != nil {
+		return err
+	}
+	if num, _ := LanguageCount(txn); num < 1 {
+		models.InitLanguageTable(txn)
+	}
+	txn.Commit()
+	return nil
 }

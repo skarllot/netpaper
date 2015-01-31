@@ -19,28 +19,8 @@ package models
 
 import "github.com/go-gorp/gorp"
 
-type Language struct {
-	Id   int64  `db:"id" json:"id"`
-	Code string `db:"code" json:"code"`
-	Name string `db:"name" json:"name"`
-}
-
-func DefineLanguageTable(dbm *gorp.DbMap) {
-	t := dbm.AddTableWithName(Language{}, "language")
-	t.SetKeys(true, "id")
-	t.ColMap("code").SetMaxSize(5).SetNotNull(true)
-	t.ColMap("name").SetMaxSize(45).SetNotNull(true)
-}
-
-func InitLanguageTable(dbm *gorp.DbMap) {
-	languages := []*Language{
-		&Language{0, "en-US", "English (Default)"},
-		&Language{0, "pt-BR", "Português (Brasil)"},
-	}
-
-	for _, l := range languages {
-		if err := dbm.Insert(l); err != nil {
-			panic(err)
-		}
-	}
+func DefineAllTables(dbm *gorp.DbMap) {
+	DefineUserTable(dbm)
+	DefineLanguageTable(dbm)
+	DefineSessionTable(dbm)
 }
