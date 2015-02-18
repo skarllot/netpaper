@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 package bll
 
 import (
@@ -23,6 +24,7 @@ import (
 	"fmt"
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/skarllot/appcontext"
 	"github.com/skarllot/netpaper/dal"
 	"log"
 	"net/http"
@@ -33,7 +35,7 @@ type AppContext struct {
 	config *Configuration
 	dbm    *gorp.DbMap
 	txn    *gorp.Transaction
-	token  *TokenStore
+	token  *appcontext.TokenStore
 }
 
 func (c *AppContext) InitDb() error {
@@ -68,7 +70,7 @@ func (c *AppContext) InitDb() error {
 }
 
 func (c *AppContext) InitTokenStore() error {
-	c.token = (&TokenStore{}).New(
+	c.token = appcontext.NewTokenStore(
 		c.config.Application.GetTokenLifeDuration(),
 		c.config.Application.GetAuthTokenLifeDuration(),
 		c.config.Application.Secret)

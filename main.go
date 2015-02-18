@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 package main
 
 import (
@@ -25,14 +26,17 @@ import (
 	"log"
 	"net/http"
 	"runtime"
-	"strconv"
+)
+
+const (
+	CONFIG_FILE_NAME = "netpaper.gcfg"
 )
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	cfg := bll.Configuration{}
-	if err := cfg.Load("netpaper.gcfg"); err != nil {
+	if err := cfg.Load(CONFIG_FILE_NAME); err != nil {
 		fmt.Println("Could not load configuration file:", err)
 		return
 	}
@@ -62,7 +66,7 @@ func main() {
 	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(logon.HasUsers))
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)
 	http.ListenAndServe(
-		":"+strconv.Itoa(int(cfg.Application.Port)),
+		fmt.Sprintf(":%d", cfg.Application.Port),
 		router.httpRouter)
 }
 
