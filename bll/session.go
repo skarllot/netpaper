@@ -19,8 +19,7 @@
 package bll
 
 import (
-	"github.com/gorilla/context"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -31,25 +30,32 @@ type Session struct {
 func (s *Session) Create(w http.ResponseWriter, r *http.Request) {
 	token := s.Context.token.NewToken()
 
+	w.WriteHeader(http.StatusCreated)
 	(JsonResponse{token}).Write(w)
 }
 
 func (s *Session) Destroy(w http.ResponseWriter, r *http.Request) {
-	params := context.Get(r, "params").(httprouter.Params)
-	//token := context.Get(r, "token").(string)
-	err := s.Context.token.RemoveToken(params.ByName("token"))
+	id := mux.Vars(r)["id"]
 
+	err := s.Context.token.RemoveToken(id)
 	if err == nil {
+		w.WriteHeader(http.StatusOK)
 		(JsonResponse{true}).Write(w)
 	} else {
+		w.WriteHeader(http.StatusNotFound)
 		(JsonError{err.Error()}).Write(w)
 	}
 }
 
 func (s *Session) Validate(w http.ResponseWriter, r *http.Request) {
-	params := context.Get(r, "params").(httprouter.Params)
-	//token := context.Get(r, "token").(string)
-	_, err := s.Context.token.GetValue(params.ByName("token"))
+	id := mux.Vars(r)["id"]
 
-	(JsonResponse{err == nil}).Write(w)
+	_, err := s.Context.token.GetValue(id)
+	if err == nil {
+		w.WriteHeader(http.StatusOK)
+		(JsonResponse{true}).Write(w)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+		(JsonError{""}).Write(w)
+	}
 }

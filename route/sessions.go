@@ -16,27 +16,37 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package bll
+package route
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/skarllot/netpaper/bll"
 )
 
-type JsonResponse struct {
-	Result interface{} `json:"result"`
+var sessions = Routes{
+	Route{
+		"CreateSession",
+		"POST",
+		"/sessions",
+		nil,
+	},
+	Route{
+		"DeleteSession",
+		"DELETE",
+		"/sessions/:id",
+		nil,
+	},
+	Route{
+		"ValidateSession",
+		"GET",
+		"/sessions/:id",
+		nil,
+	},
 }
 
-func (j JsonResponse) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
-}
+func Sessions(s *bll.Session) Routes {
+	sessions[0].HandlerFunc = s.Create
+	sessions[1].HandlerFunc = s.Destroy
+	sessions[2].HandlerFunc = s.Validate
 
-type JsonError struct {
-	Error string `json:"error"`
-}
-
-func (j JsonError) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
+	return sessions
 }

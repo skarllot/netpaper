@@ -54,7 +54,7 @@ func (l *Logon) DoLogon(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 }
 
-func (l *Logon) HasUsers(w http.ResponseWriter, r *http.Request) {
+func (l *Logon) UserCount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var count int64
 
@@ -72,5 +72,5 @@ func (l *Logon) HasUsers(w http.ResponseWriter, r *http.Request) {
 	l.Context.txn.Commit()
 	l.Context.txn = nil
 
-	(JsonResponse{count > 0}).Write(w)
+	(JsonResponse{count}).Write(w)
 }

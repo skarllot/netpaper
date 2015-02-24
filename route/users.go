@@ -16,29 +16,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package main
+package route
 
 import (
-	"github.com/gorilla/context"
-	"github.com/julienschmidt/httprouter"
-	"net/http"
+	"github.com/skarllot/netpaper/bll"
 )
 
-type routerWrapper struct {
-	httpRouter *httprouter.Router
+var users = Routes{
+	Route{
+		"GetUser",
+		"GET",
+		"/users/:user",
+		nil,
+	},
 }
 
-func (r *routerWrapper) Get(path string, handler http.Handler) {
-	r.httpRouter.GET(path, wrapHandler(handler))
-}
+func Users(l *bll.Logon) Routes {
+	users[0].HandlerFunc = nil
 
-func NewRouter() *routerWrapper {
-	return &routerWrapper{httprouter.New()}
-}
-
-func wrapHandler(h http.Handler) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		context.Set(r, "params", ps)
-		h.ServeHTTP(w, r)
-	}
+	return users
 }

@@ -16,27 +16,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package bll
+package route
 
-import (
-	"encoding/json"
-	"net/http"
-)
+import "net/http"
 
-type JsonResponse struct {
-	Result interface{} `json:"result"`
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
 
-func (j JsonResponse) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
-}
-
-type JsonError struct {
-	Error string `json:"error"`
-}
-
-func (j JsonError) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
-}
+type Routes []Route

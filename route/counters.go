@@ -16,27 +16,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package bll
+package route
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/skarllot/netpaper/bll"
 )
 
-type JsonResponse struct {
-	Result interface{} `json:"result"`
+var userCounter = Route{
+	"UserCount",
+	"GET",
+	"/counters/users",
+	nil,
 }
 
-func (j JsonResponse) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
-}
-
-type JsonError struct {
-	Error string `json:"error"`
-}
-
-func (j JsonError) Write(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	json.NewEncoder(w).Encode(j)
+func UserCounter(l *bll.Logon) Route {
+	userCounter.HandlerFunc = l.UserCount
+	return userCounter
 }

@@ -21,8 +21,10 @@ package main
 import (
 	"fmt"
 	"github.com/gorilla/context"
+	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 	"github.com/skarllot/netpaper/bll"
+	"github.com/skarllot/netpaper/route"
 	"log"
 	"net/http"
 	"runtime"
@@ -57,17 +59,32 @@ func main() {
 	logon := bll.Logon{&appC}
 	session := bll.Session{&appC}
 
-	commonHandlers := alice.New(context.ClearHandler, appC.LoggingHandler, recoverHandler)
-	router := NewRouter()
-	router.Get("/session/create", commonHandlers.ThenFunc(session.Create))
-	router.Get("/session/destroy/:token", commonHandlers.ThenFunc(session.Destroy))
-	router.Get("/session/validate/:token", commonHandlers.ThenFunc(session.Validate))
-	router.Get("/logon/doLogon", commonHandlers.ThenFunc(logon.DoLogon))
-	router.Get("/logon/hasUsers", commonHandlers.ThenFunc(logon.HasUsers))
+	commonHandlers := alice.New(
+		context.ClearHandler,
+		appC.LoggingHandler,
+		recoverHandler)
+
+	router := mux.NewRouter().StrictSlash(true)
+	for _, r := range route.Sessions(&session) {
+		addRoute(router, commonHandlers, r)
+	}
+	for _, r := range route.Users(&logon) {
+		addRoute(router, commonHandlers, r)
+	}
+	addRoute(router, commonHandlers, route.UserCounter(&logon))
+
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)
 	http.ListenAndServe(
 		fmt.Sprintf(":%d", cfg.Application.Port),
-		router.httpRouter)
+		router)
+}
+
+func addRoute(router *mux.Router, handlers alice.Chain, r route.Route) {
+	router.
+		Methods(r.Method).
+		Path(r.Pattern).
+		Name(r.Name).
+		Handler(handlers.ThenFunc(r.HandlerFunc))
 }
 
 func recoverHandler(next http.Handler) http.Handler {
