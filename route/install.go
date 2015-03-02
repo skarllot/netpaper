@@ -22,17 +22,21 @@ import (
 	"github.com/skarllot/netpaper/bll"
 )
 
-var users = Routes{
+var install = Routes{
 	Route{
-		"GetUser",
+		"GetInstallStatus",
 		"GET",
-		"/users/:user",
+		"/install",
+		nil,
+	},
+	Route{
+		"CreateFirstUser",
+		"POST",
+		"/install",
 		nil,
 	},
 }
 
-func Users(l *bll.Logon) Routes {
-	users[0].HandlerFunc = nil
-
-	return users
+func loadInstall(context *bll.AppContext) Routes {
+	return install
 }

@@ -22,31 +22,15 @@ import (
 	"github.com/skarllot/netpaper/bll"
 )
 
-var sessions = Routes{
+var account = Routes{
 	Route{
-		"CreateSession",
-		"POST",
-		"/sessions",
-		nil,
-	},
-	Route{
-		"DeleteSession",
-		"DELETE",
-		"/sessions/:id",
-		nil,
-	},
-	Route{
-		"ValidateSession",
+		"VerifyCredentials",
 		"GET",
-		"/sessions/:id",
+		"/account/verify-credentials",
 		nil,
 	},
 }
 
-func Sessions(s *bll.Session) Routes {
-	sessions[0].HandlerFunc = s.Create
-	sessions[1].HandlerFunc = s.Destroy
-	sessions[2].HandlerFunc = s.Validate
-
-	return sessions
+func loadAccount(context *bll.AppContext) Routes {
+	return account
 }
