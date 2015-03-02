@@ -20,10 +20,12 @@ package dal
 
 import (
 	"github.com/go-gorp/gorp"
+	"github.com/skarllot/netpaper/models"
 )
 
 const (
 	SQL_GET_LANGUAGE_COUNT = `SELECT count(id) AS count FROM language`
+	SQL_GET_LANGUAGES      = `SELECT id, code, name FROM language`
 )
 
 func LanguageCount(txn *gorp.Transaction) (int64, error) {
@@ -32,4 +34,15 @@ func LanguageCount(txn *gorp.Transaction) (int64, error) {
 		return -1, err
 	}
 	return count, err
+}
+
+func GetLanguages(txn *gorp.Transaction) ([]models.Language, error) {
+	var qrows []models.Language
+
+	_, err := txn.Select(&qrows, SQL_GET_LANGUAGES)
+	if err != nil {
+		return nil, err
+	}
+
+	return qrows, nil
 }

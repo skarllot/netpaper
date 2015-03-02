@@ -56,35 +56,27 @@ func main() {
 		return
 	}
 
-	logon := bll.Logon{&appC}
-	session := bll.Session{&appC}
-
 	commonHandlers := alice.New(
 		context.ClearHandler,
 		appC.LoggingHandler,
 		recoverHandler)
 
 	router := mux.NewRouter().StrictSlash(true)
-	for _, r := range route.Sessions(&session) {
-		addRoute(router, commonHandlers, r)
+	for _, r := range route.LoadRoutes(&appC) {
+		router.
+			Methods(r.Method).
+			Path(r.Pattern).
+			Name(r.Name).
+			Handler(commonHandlers.ThenFunc(r.HandlerFunc))
 	}
-	for _, r := range route.Users(&logon) {
-		addRoute(router, commonHandlers, r)
-	}
-	addRoute(router, commonHandlers, route.UserCounter(&logon))
 
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)
-	http.ListenAndServe(
+	err = http.ListenAndServe(
 		fmt.Sprintf(":%d", cfg.Application.Port),
 		router)
-}
-
-func addRoute(router *mux.Router, handlers alice.Chain, r route.Route) {
-	router.
-		Methods(r.Method).
-		Path(r.Pattern).
-		Name(r.Name).
-		Handler(handlers.ThenFunc(r.HandlerFunc))
+	if err != nil {
+		fmt.Println("Could not initialize HTTP server:", err)
+	}
 }
 
 func recoverHandler(next http.Handler) http.Handler {

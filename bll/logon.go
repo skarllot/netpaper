@@ -72,5 +72,5 @@ func (l *Logon) UserCount(w http.ResponseWriter, r *http.Request) {
 	l.Context.txn.Commit()
 	l.Context.txn = nil
 
-	(JsonResponse{count}).Write(w)
+	(JsonResponse{count}).Write(w, http.StatusOK)
 }

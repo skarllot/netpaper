@@ -20,23 +20,20 @@ package route
 
 import (
 	"github.com/skarllot/netpaper/bll"
-	"net/http"
 )
 
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
+var languages = Routes{
+	Route{
+		"GetLanguages",
+		"GET",
+		"/languages",
+		nil,
+	},
 }
 
-type Routes []Route
+func loadLanguages(context *bll.AppContext) Routes {
+	langs := bll.Languages{context}
+	languages[0].HandlerFunc = langs.GetLanguages
 
-func LoadRoutes(context *bll.AppContext) Routes {
-	routes := make(Routes, 0)
-
-	langs := loadLanguages(context)
-	routes = append(routes, langs...)
-
-	return routes
+	return languages
 }

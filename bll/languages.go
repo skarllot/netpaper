@@ -19,39 +19,28 @@
 package bll
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/skarllot/netpaper/dal"
 	"net/http"
 )
 
-type Session struct {
+type Languages struct {
 	Context *AppContext
 }
 
-func (s *Session) Create(w http.ResponseWriter, r *http.Request) {
-	token := s.Context.token.NewToken()
-
-	(JsonResponse{token}).Write(w, http.StatusCreated)
-}
-
-func (s *Session) Destroy(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-
-	err := s.Context.token.RemoveToken(id)
-	if err == nil {
-		(JsonResponse{true}).Write(w, http.StatusOK)
-	} else {
-		(JsonError{err.Error()}).Write(w, http.StatusNotFound)
+func (self *Languages) GetLanguages(w http.ResponseWriter, r *http.Request) {
+	txn, err := self.Context.dbm.Begin()
+	if err != nil {
+		(JsonError{err.Error()}).Write(w, http.StatusInternalServerError)
+		return
 	}
-}
 
-func (s *Session) Validate(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-
-	_, err := s.Context.token.GetValue(id)
-	if err == nil {
-		w.WriteHeader(http.StatusOK)
-		(JsonResponse{true}).Write(w, http.StatusOK)
-	} else {
-		(JsonError{""}).Write(w, http.StatusNotFound)
+	rows, err := dal.GetLanguages(txn)
+	if err != nil {
+		txn.Rollback()
+		(JsonError{err.Error()}).Write(w, http.StatusInternalServerError)
+		return
 	}
+	txn.Commit()
+
+	(JsonResponse{rows}).Write(w, http.StatusOK)
 }
