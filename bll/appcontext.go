@@ -34,7 +34,6 @@ import (
 type AppContext struct {
 	config *Configuration
 	dbm    *gorp.DbMap
-	txn    *gorp.Transaction
 	token  *appcontext.TokenStore
 }
 

@@ -30,17 +30,17 @@ type Languages struct {
 func (self *Languages) GetLanguages(w http.ResponseWriter, r *http.Request) {
 	txn, err := self.Context.dbm.Begin()
 	if err != nil {
-		(JsonError{err.Error()}).Write(w, http.StatusInternalServerError)
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	rows, err := dal.GetLanguages(txn)
 	if err != nil {
 		txn.Rollback()
-		(JsonError{err.Error()}).Write(w, http.StatusInternalServerError)
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	txn.Commit()
 
-	(JsonResponse{rows}).Write(w, http.StatusOK)
+	JsonWrite(w, http.StatusOK, rows)
 }

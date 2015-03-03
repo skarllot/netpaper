@@ -34,9 +34,8 @@ type Routes []Route
 
 func LoadRoutes(context *bll.AppContext) Routes {
 	routes := make(Routes, 0)
-
-	langs := loadLanguages(context)
-	routes = append(routes, langs...)
+	routes = append(routes, loadLanguages(context)...)
+	routes = append(routes, loadInstall(context)...)
 
 	return routes
 }

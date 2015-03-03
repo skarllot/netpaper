@@ -30,7 +30,7 @@ type Session struct {
 func (s *Session) Create(w http.ResponseWriter, r *http.Request) {
 	token := s.Context.token.NewToken()
 
-	(JsonResponse{token}).Write(w, http.StatusCreated)
+	JsonWrite(w, http.StatusCreated, token)
 }
 
 func (s *Session) Destroy(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +38,9 @@ func (s *Session) Destroy(w http.ResponseWriter, r *http.Request) {
 
 	err := s.Context.token.RemoveToken(id)
 	if err == nil {
-		(JsonResponse{true}).Write(w, http.StatusOK)
+		JsonWrite(w, http.StatusOK, true)
 	} else {
-		(JsonError{err.Error()}).Write(w, http.StatusNotFound)
+		JsonWrite(w, http.StatusNotFound, err.Error())
 	}
 }
 
@@ -49,9 +49,8 @@ func (s *Session) Validate(w http.ResponseWriter, r *http.Request) {
 
 	_, err := s.Context.token.GetValue(id)
 	if err == nil {
-		w.WriteHeader(http.StatusOK)
-		(JsonResponse{true}).Write(w, http.StatusOK)
+		JsonWrite(w, http.StatusOK, true)
 	} else {
-		(JsonError{""}).Write(w, http.StatusNotFound)
+		JsonWrite(w, http.StatusNotFound, "")
 	}
 }

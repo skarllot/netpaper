@@ -23,22 +23,8 @@ import (
 	"net/http"
 )
 
-type JsonResponse struct {
-	Result interface{} `json:"result"`
-}
-
-func (j JsonResponse) Write(w http.ResponseWriter, status int) {
+func JsonWrite(w http.ResponseWriter, status int, content interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(j)
-}
-
-type JsonError struct {
-	Error string `json:"error"`
-}
-
-func (j JsonError) Write(w http.ResponseWriter, status int) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(j)
+	json.NewEncoder(w).Encode(content)
 }
