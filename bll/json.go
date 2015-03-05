@@ -20,11 +20,49 @@ package bll
 
 import (
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"net/http"
 )
 
+type HttpHeader struct {
+	Name  string
+	Value string
+}
+
+const (
+	HTTP_BODY_MAX_LENGTH = 1048576
+	// WebDAV; RFC 4918
+	StatusUnprocessableEntity = 422
+)
+
+var (
+	JSON_HEADER     = HttpHeader{"Content-Type", "application/json; charset=UTF-8"}
+	LOCATION_HEADER = HttpHeader{"Location", ""}
+)
+
 func JsonWrite(w http.ResponseWriter, status int, content interface{}) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.Header().Set(JSON_HEADER.Name, JSON_HEADER.Value)
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(content)
+}
+
+func JsonRead(body io.ReadCloser, obj interface{}, w http.ResponseWriter) bool {
+	content, err := ioutil.ReadAll(io.LimitReader(body, HTTP_BODY_MAX_LENGTH))
+	if err != nil {
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
+		return false
+	}
+
+	if err := body.Close(); err != nil {
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
+		return false
+	}
+
+	if err := json.Unmarshal(content, obj); err != nil {
+		JsonWrite(w, StatusUnprocessableEntity, err.Error())
+		return false
+	}
+
+	return true
 }

@@ -19,7 +19,9 @@
 package bll
 
 import (
+	"fmt"
 	"github.com/skarllot/netpaper/dal"
+	"github.com/skarllot/netpaper/models"
 	"net/http"
 )
 
@@ -47,4 +49,40 @@ func (self *Install) GetInstallStatus(w http.ResponseWriter, r *http.Request) {
 	} else {
 		JsonWrite(w, http.StatusForbidden, "")
 	}
+}
+
+func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
+	txn, err := self.Context.dbm.Begin()
+	if err != nil {
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	count, err := dal.UserCount(txn)
+	if err != nil {
+		txn.Rollback()
+		JsonWrite(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	if count != 0 {
+		txn.Rollback()
+		JsonWrite(w, http.StatusForbidden, "")
+		return
+	}
+
+	var reqObj models.User
+	if !JsonRead(r.Body, &reqObj, w) {
+		return
+	}
+
+	reqObj.IsAdmin = true
+	if err := dal.CreateUser(txn, &reqObj); err != nil {
+		txn.Rollback()
+		JsonWrite(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	txn.Commit()
+	w.Header().Add(LOCATION_HEADER.Name, fmt.Sprintf("/users/%d", reqObj.Id))
+	JsonWrite(w, http.StatusCreated, reqObj)
 }

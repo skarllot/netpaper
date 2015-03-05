@@ -40,6 +40,7 @@ var install = Routes{
 func loadInstall(context *bll.AppContext) Routes {
 	inst := bll.Install{context}
 	install[0].HandlerFunc = inst.GetInstallStatus
+	install[1].HandlerFunc = inst.CreateFirstUser
 
 	return install
 }

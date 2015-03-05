@@ -36,6 +36,10 @@ const (
 	SQL_IS_LDAP = `SELECT is_ldap FROM user WHERE user = :user`
 )
 
+func CreateUser(txn *gorp.Transaction, user *models.User) error {
+	return txn.Insert(user)
+}
+
 func GetUser(txn *gorp.Transaction, user string, password string) (*models.User, error) {
 	var qrows []models.User
 	var err error
@@ -54,7 +58,7 @@ func GetUser(txn *gorp.Transaction, user string, password string) (*models.User,
 		return nil, err
 	}
 
-	return &qrows[0], err
+	return &qrows[0], nil
 }
 
 func UserCount(txn *gorp.Transaction) (int64, error) {
@@ -62,5 +66,5 @@ func UserCount(txn *gorp.Transaction) (int64, error) {
 	if err != nil {
 		return -1, err
 	}
-	return count, err
+	return count, nil
 }

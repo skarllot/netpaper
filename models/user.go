@@ -19,19 +19,19 @@
 package models
 
 import (
-	"database/sql"
+	"errors"
 	"github.com/go-gorp/gorp"
 )
 
 type User struct {
-	Id         int64          `db:"id" json:"id"`
-	User       string         `db:"user" json:"user"`
-	Password   sql.NullString `db:"password" json:"password"`
-	Email      sql.NullString `db:"email" json:"email"`
-	Name       string         `db:"name" json:"name"`
-	IsAdmin    bool           `db:"is_admin" json:"isAdmin"`
-	IsLdap     bool           `db:"is_ldap" json:"isLdap"`
-	LanguageId int64          `db:"language" json:"-"`
+	Id         int64   `db:"id" json:"id"`
+	User       string  `db:"user" json:"user"`
+	Password   *string `db:"password" json:"password"`
+	Email      *string `db:"email" json:"email"`
+	Name       string  `db:"name" json:"name"`
+	IsAdmin    bool    `db:"is_admin" json:"isAdmin"`
+	IsLdap     bool    `db:"is_ldap" json:"isLdap"`
+	LanguageId int64   `db:"language" json:"-"`
 
 	Language *Language `db:"-" json:"language"`
 }
@@ -48,6 +48,15 @@ func DefineUserTable(dbm *gorp.DbMap) {
 }
 
 func (u *User) PreInsert(_ gorp.SqlExecutor) error {
+	if len(u.User) < 5 {
+		return errors.New("The user must contain at least 5 characters")
+	}
+	if len(u.Name) < 3 {
+		return errors.New("The user name must contain at least 5 characters")
+	}
+	if u.Language == nil {
+		return errors.New("No language defined for current user")
+	}
 	u.LanguageId = u.Language.Id
 	return nil
 }
