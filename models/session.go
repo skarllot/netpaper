@@ -19,19 +19,19 @@
 package models
 
 import (
-	"database/sql"
 	"github.com/go-gorp/gorp"
+	"net"
 	"time"
 )
 
 type Session struct {
-	Id         int64          `db:"id" json:"id"`
-	UserId     int64          `db:"user" json:"-"`
-	AuthToken  string         `db:"auth_token" json:"authToken"`
-	IpAddress  sql.NullString `db:"ipaddress" json:"ipAddress"`
-	Ip6Address sql.NullString `db:"ip6address" json:"ip6Address"`
-	CreatedAt  time.Time      `db:"created_at" json:"createdAt"`
-	UpdatedAt  time.Time      `db:"updated_at" json:"updatedAt"`
+	Id         int64     `db:"id" json:"id"`
+	UserId     int64     `db:"user" json:"-"`
+	AuthToken  string    `db:"auth_token" json:"authToken"`
+	IpAddress  *string   `db:"ipaddress" json:"ipAddress"`
+	Ip6Address *string   `db:"ip6address" json:"ip6Address"`
+	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt  time.Time `db:"updated_at" json:"updatedAt"`
 
 	User *User `db:"-" json:"user"`
 }
@@ -42,6 +42,20 @@ func DefineSessionTable(dbm *gorp.DbMap) {
 	t.ColMap("user").SetNotNull(true)
 	t.ColMap("auth_token").SetNotNull(true)
 	t.ColMap("ipaddress").SetMaxSize(15)
-	t.ColMap("ip6address").SetMaxSize(39)
+	t.ColMap("ip6address").SetMaxSize(45)
 	t.ColMap("created_at").SetNotNull(true)
+}
+
+func (self *Session) ParseIpAddress() net.IP {
+	if self.IpAddress != nil {
+		return net.ParseIP(*self.IpAddress)
+	}
+	return nil
+}
+
+func (self *Session) ParseIp6Address() net.IP {
+	if self.Ip6Address != nil {
+		return net.ParseIP(*self.Ip6Address)
+	}
+	return nil
 }

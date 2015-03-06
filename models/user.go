@@ -32,13 +32,14 @@ type User struct {
 	IsAdmin    bool    `db:"is_admin" json:"isAdmin"`
 	IsLdap     bool    `db:"is_ldap" json:"isLdap"`
 	LanguageId int64   `db:"language" json:"-"`
+	Version    int64   `db:"version" json:"version"`
 
 	Language *Language `db:"-" json:"language"`
 }
 
 func DefineUserTable(dbm *gorp.DbMap) {
 	t := dbm.AddTableWithName(User{}, "user")
-	t.SetKeys(true, "id")
+	t.SetKeys(true, "id").SetVersionCol("version")
 	t.ColMap("user").SetMaxSize(45).SetNotNull(true)
 	t.ColMap("password").SetMaxSize(64)
 	t.ColMap("name").SetNotNull(true)
