@@ -16,31 +16,17 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package route
+package bll
 
 import (
-	"github.com/skarllot/netpaper/bll"
+	"net/http"
 )
 
-var install = Routes{
-	Route{
-		"GetInstallStatus",
-		"GET",
-		"/install",
-		nil,
-	},
-	Route{
-		"CreateFirstUser",
-		"POST",
-		"/install",
-		nil,
-	},
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
 
-func loadInstall(context *bll.AppContext) Routes {
-	inst := bll.Install{context}
-	install[0].HandlerFunc = inst.GetInstallStatus
-	install[1].HandlerFunc = inst.CreateFirstUser
-
-	return install
-}
+type Routes []Route

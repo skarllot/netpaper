@@ -86,3 +86,20 @@ func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add(LOCATION_HEADER.Name, fmt.Sprintf("/users/%d", reqObj.Id))
 	JsonWrite(w, http.StatusCreated, reqObj)
 }
+
+func (self *Install) Routes() Routes {
+	return Routes{
+		Route{
+			"GetInstallStatus",
+			"GET",
+			"/install",
+			self.GetInstallStatus,
+		},
+		Route{
+			"CreateFirstUser",
+			"POST",
+			"/install",
+			self.CreateFirstUser,
+		},
+	}
+}

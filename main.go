@@ -24,7 +24,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 	"github.com/skarllot/netpaper/bll"
-	"github.com/skarllot/netpaper/route"
 	"log"
 	"net/http"
 	"runtime"
@@ -62,7 +61,10 @@ func main() {
 		recoverHandler)
 
 	router := mux.NewRouter().StrictSlash(true)
-	for _, r := range route.LoadRoutes(&appC) {
+	routes := make(bll.Routes, 0)
+	routes = append(routes, (&bll.Languages{&appC}).Routes()...)
+	routes = append(routes, (&bll.Install{&appC}).Routes()...)
+	for _, r := range routes {
 		router.
 			Methods(r.Method).
 			Path(r.Pattern).

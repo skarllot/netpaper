@@ -44,3 +44,14 @@ func (self *Languages) GetLanguages(w http.ResponseWriter, r *http.Request) {
 
 	JsonWrite(w, http.StatusOK, rows)
 }
+
+func (self *Languages) Routes() Routes {
+	return Routes{
+		Route{
+			"GetLanguages",
+			"GET",
+			"/languages",
+			self.GetLanguages,
+		},
+	}
+}
