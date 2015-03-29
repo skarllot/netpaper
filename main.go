@@ -68,19 +68,20 @@ func main() {
 	routes := make(bll.Routes, 0)
 	routes = append(routes, (&bll.Languages{&appC}).Routes()...)
 	routes = append(routes, (&bll.Install{&appC}).Routes()...)
+	routes = append(routes, logon.Routes()...)
 	for _, r := range routes {
+		var handlers alice.Chain
+		if r.MustAuth {
+			handlers = handlersAuth
+		} else {
+			handlers = commonHandlers
+		}
+
 		router.
 			Methods(r.Method).
 			Path(r.Pattern).
 			Name(r.Name).
-			Handler(commonHandlers.ThenFunc(r.HandlerFunc))
-	}
-	for _, r := range logon.Routes() {
-		router.
-			Methods(r.Method).
-			Path(r.Pattern).
-			Name(r.Name).
-			Handler(handlersAuth.ThenFunc(r.HandlerFunc))
+			Handler(handlers.ThenFunc(r.HandlerFunc))
 	}
 
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)

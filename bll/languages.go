@@ -51,6 +51,7 @@ func (self *Languages) Routes() Routes {
 			"GetLanguages",
 			"GET",
 			"/languages",
+			false,
 			self.GetLanguages,
 		},
 	}

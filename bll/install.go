@@ -93,12 +93,14 @@ func (self *Install) Routes() Routes {
 			"GetInstallStatus",
 			"GET",
 			"/install",
+			false,
 			self.GetInstallStatus,
 		},
 		Route{
 			"CreateFirstUser",
 			"POST",
 			"/install",
+			false,
 			self.CreateFirstUser,
 		},
 	}

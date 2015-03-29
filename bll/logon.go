@@ -69,6 +69,7 @@ func (self *Logon) Routes() Routes {
 			"VerifyCredentials",
 			"GET",
 			"/account/verify-credentials",
+			true,
 			self.VerifyCredentials,
 		},
 	}
