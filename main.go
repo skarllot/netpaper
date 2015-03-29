@@ -55,10 +55,14 @@ func main() {
 		return
 	}
 
+	logon := bll.Logon{&appC}
+
 	commonHandlers := alice.New(
 		context.ClearHandler,
 		appC.LoggingHandler,
 		recoverHandler)
+	handlersAuth := commonHandlers.
+		Append((bll.HttpBasicAuthenticator{&logon}).BasicAuth)
 
 	router := mux.NewRouter().StrictSlash(true)
 	routes := make(bll.Routes, 0)
@@ -70,6 +74,13 @@ func main() {
 			Path(r.Pattern).
 			Name(r.Name).
 			Handler(commonHandlers.ThenFunc(r.HandlerFunc))
+	}
+	for _, r := range logon.Routes() {
+		router.
+			Methods(r.Method).
+			Path(r.Pattern).
+			Name(r.Name).
+			Handler(handlersAuth.ThenFunc(r.HandlerFunc))
 	}
 
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)

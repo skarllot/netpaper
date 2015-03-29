@@ -19,11 +19,10 @@
 package bll
 
 import (
-	"bytes"
-	"encoding/base64"
+	"github.com/gorilla/context"
 	"github.com/skarllot/netpaper/dal"
+	"log"
 	"net/http"
-	"strings"
 )
 
 type Logon struct {
@@ -34,40 +33,43 @@ const (
 	basicAuthPrefix = "Basic "
 )
 
-func (l *Logon) DoLogon(w http.ResponseWriter, r *http.Request) {
-	//params := context.Get(r, "params").(httprouter.Params)
-
-	auth := r.Header.Get("Authorization")
-	if strings.HasPrefix(auth, basicAuthPrefix) {
-		payload, err := base64.StdEncoding.DecodeString(auth[len(basicAuthPrefix):])
-		if err == nil {
-			pair := bytes.SplitN(payload, []byte(":"), 2)
-			if len(pair) == 2 &&
-				bytes.Equal(pair[0], []byte("user")) &&
-				bytes.Equal(pair[1], []byte("pass")) {
-				return
-			}
-		}
-	}
-
-	w.Header().Set("WWW-Authenticate", "Basic realm=Restricted")
-	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-}
-
-func (l *Logon) UserCount(w http.ResponseWriter, r *http.Request) {
-	var count int64
-
-	txn, err := l.Context.dbm.Begin()
+func (self *Logon) TryAuthentication(r *http.Request, user, secret string) bool {
+	txn, err := self.Context.dbm.Begin()
 	if err != nil {
-		return
+		log.Printf("TryAuthentication error: %s\n", err.Error())
+		return false
 	}
 
-	count, err = dal.UserCount(txn)
+	userRow, err := dal.GetUser(txn, user, secret)
 	if err != nil {
 		txn.Rollback()
-		return
+		log.Printf("TryAuthentication error: %s\n", err.Error())
+		return false
 	}
 	txn.Commit()
 
-	JsonWrite(w, http.StatusOK, count)
+	if userRow != nil {
+		context.Set(r, "auth", userRow)
+		return true
+	}
+	return false
+}
+
+func (self *Logon) VerifyCredentials(w http.ResponseWriter, r *http.Request) {
+	if user := context.Get(r, "auth"); user != nil {
+		JsonWrite(w, http.StatusOK, user)
+	} else {
+		JsonWrite(w, http.StatusForbidden, "")
+	}
+}
+
+func (self *Logon) Routes() Routes {
+	return Routes{
+		Route{
+			"VerifyCredentials",
+			"GET",
+			"/account/verify-credentials",
+			self.VerifyCredentials,
+		},
+	}
 }

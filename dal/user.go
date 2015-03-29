@@ -25,13 +25,16 @@ import (
 
 const (
 	SQL_CREATE_USER = `INSERT INTO user
-		(user, password, email, name, admin, is_ldap, language)
-		VALUES (:user, :pass, :email, :name, :admin, :isldap, :lang)`
+		(user, password, email, name, is_admin, is_ldap, language, version)
+		VALUES (:user, :pass, :email, :name, :admin, :isldap, :lang, :version)`
 	SQL_GET_USER = `SELECT id, user, password, email, name, admin,
-        is_ldap, language FROM user WHERE user = :user`
+        is_ldap, language, version
+		FROM user
+		WHERE user = :user`
 	SQL_GET_USER_COUNT         = `SELECT count(id) AS count FROM user`
 	SQL_GET_USER_WITH_PASSWORD = `SELECT id, user, password, email, name,
-        admin, is_ldap, language FROM user
+        is_admin, is_ldap, language, version
+		FROM user
         WHERE user = :user AND password = :pass`
 	SQL_IS_LDAP = `SELECT is_ldap FROM user WHERE user = :user`
 )

@@ -55,6 +55,9 @@ func (u *User) PreInsert(_ gorp.SqlExecutor) error {
 	if len(u.Name) < 3 {
 		return errors.New("The user name must contain at least 5 characters")
 	}
+	if u.Password == nil || len(*u.Password) < 8 {
+		return errors.New("The user password must contain at least 8 characters")
+	}
 	if u.Language == nil {
 		return errors.New("No language defined for current user")
 	}
