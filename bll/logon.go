@@ -31,6 +31,7 @@ type Logon struct {
 
 const (
 	basicAuthPrefix = "Basic "
+	authContextKey  = "auth"
 )
 
 func (self *Logon) TryAuthentication(r *http.Request, user, secret string) bool {
@@ -49,28 +50,36 @@ func (self *Logon) TryAuthentication(r *http.Request, user, secret string) bool 
 	txn.Commit()
 
 	if userRow != nil {
-		context.Set(r, "auth", userRow)
+		context.Set(r, authContextKey, userRow)
 		return true
 	}
 	return false
 }
 
-func (self *Logon) VerifyCredentials(w http.ResponseWriter, r *http.Request) {
-	if user := context.Get(r, "auth"); user != nil {
-		JsonWrite(w, http.StatusOK, user)
-	} else {
-		JsonWrite(w, http.StatusForbidden, "")
-	}
+func (self *Logon) Validate(w http.ResponseWriter, r *http.Request) {
+	JsonWrite(w, http.StatusOK, "")
+}
+
+func (self *Logon) Destroy(w http.ResponseWriter, r *http.Request) {
+	context.Delete(r, authContextKey)
+	JsonWrite(w, http.StatusOK, "")
 }
 
 func (self *Logon) Routes() Routes {
 	return Routes{
 		Route{
-			"VerifyCredentials",
+			"AuthValidate",
 			"GET",
-			"/account/verify-credentials",
+			"/auth/validate",
 			true,
-			self.VerifyCredentials,
+			self.Validate,
+		},
+		Route{
+			"AuthDestroy",
+			"POST",
+			"/auth/destroy",
+			true,
+			self.Destroy,
 		},
 	}
 }

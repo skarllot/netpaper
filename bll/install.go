@@ -45,9 +45,9 @@ func (self *Install) GetInstallStatus(w http.ResponseWriter, r *http.Request) {
 	txn.Commit()
 
 	if count == 0 {
-		JsonWrite(w, http.StatusOK, []string{})
+		JsonWrite(w, http.StatusOK, false)
 	} else {
-		JsonWrite(w, http.StatusForbidden, "")
+		JsonWrite(w, http.StatusOK, true)
 	}
 }
 

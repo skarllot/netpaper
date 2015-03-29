@@ -4,92 +4,63 @@ title Logon Sequence
 actor User
 participant UI
 boundary "Web Service" as WS
-control Session
+control Languages
+control Install
 control Logon
 
 
-== No user exists ==
 User -> UI
 activate UI
-	UI -> WS: create
+	UI -> WS: GetLanguages
 	activate WS
-		WS -> Session
-		activate Session
-		Session -> WS: token
-		deactivate Session
+		WS -> Languages
+		activate Languages
+		Languages -> WS: Language list
+		deactivate Languages
 		WS -> UI
 	deactivate WS
-	UI -> WS: getLanguages
+
+== Install ==
+	UI -> WS: GetInstallStatus
 	activate WS
-		WS -> Logon
-		activate Logon
-		Logon -> WS: Language list
-		deactivate Logon
+		WS -> Install
+		activate Install
+		alt Install was never done
+			Install -> WS: False
+		else Install was already done
+			Install -> WS: True
+		end
+		deactivate Install
 		WS -> UI
 	deactivate WS
-	UI -> WS: hasUsers
-	activate WS
-		WS -> Logon
-		activate Logon
-		Logon -> WS: False
-		deactivate Logon
-		WS -> UI
-	deactivate WS
+deactivate UI
+
+alt Install was never done
 	UI -> User: Require login creation
-deactivate UI
-
-User -> UI: Submit login fields
-activate UI
-	UI -> WS: createFirstLogin
-	activate WS
-		WS -> Logon
-		activate Logon
-		Logon -> WS: True
-		deactivate Logon
-		WS -> UI
-	deactivate WS
-	UI -> User: Creation success
-	UI -> User: Request logon
-deactivate UI
-
-== At least one user exists ==
-User -> UI
-activate UI
-	UI -> WS: create
-	activate WS
-		WS -> Session
-		activate Session
-		Session -> WS: token
-		deactivate Session
-		WS -> UI
-	deactivate WS
-	UI -> WS: getLanguages
-	activate WS
-		WS -> Logon
-		activate Logon
-		Logon -> WS: Language list
-		deactivate Logon
-		WS -> UI
-	deactivate WS
-	UI -> WS: hasUsers
-	activate WS
-		WS -> Logon
-		activate Logon
-		Logon -> WS: True
-		deactivate Logon
-		WS -> UI
-	deactivate WS
-	UI -> User: Request logon
-deactivate UI
-
+	
+	User -> UI: Submit new login
+	activate UI
+		UI -> WS: CreateFirstUser
+		activate WS
+			WS -> Install
+			activate Install
+			Install -> WS: New user
+			deactivate Install
+			WS -> UI
+		deactivate WS
+		UI -> User: Successful install
+	deactivate UI
+end
 == ==
+
+
 User -> UI: Logon fields
 activate UI
-	UI -> WS: doLogon
+	UI -> WS: AuthValidate
 	activate WS
 		WS -> Logon
 		activate Logon
-		Logon -> WS: True
+		Logon -> WS
 		deactivate Logon
 		WS -> UI
 	deactivate WS
@@ -98,12 +69,12 @@ deactivate UI
 ...
 User -> UI: Request logoff
 activate UI
-	UI -> WS: destroy
+	UI -> WS: AuthDestroy
 	activate WS
-		WS -> Session
-		activate Session
-		Session -> WS: True
-		deactivate Session
+		WS -> Logon
+		activate Logon
+		Logon -> WS
+		deactivate Logon
 		WS -> UI
 	deactivate WS
 	UI -> User: Logon page
