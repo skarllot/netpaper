@@ -65,6 +65,8 @@ func main() {
 		Append((bll.HttpBasicAuthenticator{&logon}).BasicAuth)
 
 	router := mux.NewRouter().StrictSlash(true)
+	v1 := router.PathPrefix("/v1").Subrouter()
+
 	routes := make(bll.Routes, 0)
 	routes = append(routes, (&bll.Languages{&appC}).Routes()...)
 	routes = append(routes, (&bll.Install{&appC}).Routes()...)
@@ -77,7 +79,7 @@ func main() {
 			handlers = commonHandlers
 		}
 
-		router.
+		v1.
 			Methods(r.Method).
 			Path(r.Pattern).
 			Name(r.Name).
@@ -98,7 +100,7 @@ func recoverHandler(next http.Handler) http.Handler {
 		defer func() {
 			if err := recover(); err != nil {
 				log.Printf("panic: %+v", err)
-				http.Error(w, http.StatusText(500), 500)
+				w.WriteHeader(http.StatusInternalServerError)
 			}
 		}()
 

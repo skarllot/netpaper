@@ -43,12 +43,7 @@ func (self *Install) GetInstallStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	txn.Commit()
-
-	if count == 0 {
-		JsonWrite(w, http.StatusOK, false)
-	} else {
-		JsonWrite(w, http.StatusOK, true)
-	}
+	JsonWrite(w, http.StatusOK, count != 0)
 }
 
 func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +78,7 @@ func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	txn.Commit()
-	w.Header().Add(LOCATION_HEADER.Name, fmt.Sprintf("/users/%d", reqObj.Id))
+	w.Header().Add(HEADER_LOCATION.Name, fmt.Sprintf("/users/%d", reqObj.Id))
 	JsonWrite(w, http.StatusCreated, reqObj)
 }
 

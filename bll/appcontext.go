@@ -24,8 +24,8 @@ import (
 	"fmt"
 	"github.com/go-gorp/gorp"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/skarllot/appcontext"
 	"github.com/skarllot/netpaper/dal"
+	"github.com/skarllot/raiqub"
 	"log"
 	"net/http"
 	"time"
@@ -34,7 +34,7 @@ import (
 type AppContext struct {
 	config *Configuration
 	dbm    *gorp.DbMap
-	token  *appcontext.TokenStore
+	token  *raiqub.TokenCache
 }
 
 func (c *AppContext) InitDb() error {
@@ -69,7 +69,7 @@ func (c *AppContext) InitDb() error {
 }
 
 func (c *AppContext) InitTokenStore() error {
-	c.token = appcontext.NewTokenStore(
+	c.token = raiqub.NewTokenCache(
 		c.config.Application.GetTokenLifeDuration(),
 		c.config.Application.GetAuthTokenLifeDuration(),
 		c.config.Application.Secret)

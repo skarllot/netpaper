@@ -6,7 +6,7 @@ AuthTokenLife=5m
 
 [Database]
 engine=mysql
-host=localhost
+host=db4free.net
 name=netpaper
 user=netpaper
 password=qNxhh3KJxJKPK9ff

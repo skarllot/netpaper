@@ -37,12 +37,20 @@ const (
 )
 
 var (
-	JSON_HEADER     = HttpHeader{"Content-Type", "application/json; charset=UTF-8"}
-	LOCATION_HEADER = HttpHeader{"Location", ""}
+	HEADER_AC_ALLOW_METHODS = HttpHeader{
+		"Access-Control-Allow-Methods",
+		"OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT"}
+	HEADER_AC_ALLOW_ORIGIN = HttpHeader{"Access-Control-Allow-Origin", "*"}
+	HEADER_JSON            = HttpHeader{
+		"Content-Type",
+		"application/json; charset=UTF-8"}
+	HEADER_LOCATION = HttpHeader{"Location", ""}
 )
 
 func JsonWrite(w http.ResponseWriter, status int, content interface{}) {
-	w.Header().Set(JSON_HEADER.Name, JSON_HEADER.Value)
+	w.Header().Set(HEADER_AC_ALLOW_ORIGIN.Name, HEADER_AC_ALLOW_ORIGIN.Value)
+	w.Header().Set(HEADER_AC_ALLOW_METHODS.Name, HEADER_AC_ALLOW_METHODS.Value)
+	w.Header().Set(HEADER_JSON.Name, HEADER_JSON.Value)
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(content)
 }
