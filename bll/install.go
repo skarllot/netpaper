@@ -71,6 +71,11 @@ func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqObj.IsAdmin = true
+	if err := reqObj.SetPassword(reqObj.Password); err != nil {
+		txn.Rollback()
+		JsonWrite(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err := dal.CreateUser(txn, &reqObj); err != nil {
 		txn.Rollback()
 		JsonWrite(w, http.StatusBadRequest, err.Error())
