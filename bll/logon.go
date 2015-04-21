@@ -41,7 +41,7 @@ func (self *Logon) TryAuthentication(r *http.Request, user, secret string) bool 
 		return false
 	}
 
-	userRow, err := dal.GetUser(txn, user, secret)
+	userRow, err := dal.GetUser(txn, user, "")
 	if err != nil {
 		txn.Rollback()
 		log.Printf("TryAuthentication error: %s\n", err.Error())
@@ -49,11 +49,12 @@ func (self *Logon) TryAuthentication(r *http.Request, user, secret string) bool 
 	}
 	txn.Commit()
 
-	if userRow != nil {
-		context.Set(r, authContextKey, userRow)
-		return true
+	if userRow == nil || !userRow.ValidatePassword(secret) {
+		return false
 	}
-	return false
+
+	context.Set(r, authContextKey, userRow)
+	return true
 }
 
 func (self *Logon) Validate(w http.ResponseWriter, r *http.Request) {
