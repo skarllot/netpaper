@@ -63,6 +63,7 @@ func main() {
 		recoverHandler)
 	handlersAuth := commonHandlers.
 		Append((bll.HttpBasicAuthenticator{&logon}).BasicAuth)
+	cors := bll.NewCORSHandler()
 
 	router := mux.NewRouter().StrictSlash(true)
 	v1 := router.PathPrefix("/v1").Subrouter()
@@ -71,6 +72,10 @@ func main() {
 	routes = append(routes, (&bll.Languages{&appC}).Routes()...)
 	routes = append(routes, (&bll.Install{&appC}).Routes()...)
 	routes = append(routes, logon.Routes()...)
+
+	corsRoutes := cors.CreateOptionsRoutes(routes)
+	routes = append(routes, corsRoutes...)
+
 	for _, r := range routes {
 		var handlers alice.Chain
 		if r.MustAuth {
@@ -78,6 +83,8 @@ func main() {
 		} else {
 			handlers = commonHandlers
 		}
+		handlers = handlers.Append(
+			(&bll.CORSMethod{*cors, r.MustAuth}).CORSMiddleware)
 
 		v1.
 			Methods(r.Method).
