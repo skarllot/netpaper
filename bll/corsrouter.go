@@ -19,34 +19,26 @@
 package bll
 
 import (
+	"github.com/skarllot/raiqub"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
 const (
-	DEFAULT_CORS_ORIGIN_HEADER    = "Origin"
 	DEFAULT_CORS_PREFLIGHT_METHOD = "OPTIONS"
 )
 
 var (
-	HEADER_AC_ALLOW_CREDENTIALS = HttpHeader{
-		"Access-Control-Allow-Credentials",
-		"true",
-	}
-	HEADER_AC_ALLOW_HEADERS = HttpHeader{
-		"Access-Control-Allow-Headers",
-		"Origin, X-Requested-With, Content-Type, Accept, Authorization",
-	}
-	HEADER_AC_MAX_AGE = HttpHeader{
+	HEADER_AC_MAX_AGE = raiqub.HttpHeader{
 		"Access-Control-Max-Age",
 		"86400",
 	}
-	HEADER_AC_ALLOW_METHODS = HttpHeader{
+	HEADER_AC_ALLOW_METHODS = raiqub.HttpHeader{
 		"Access-Control-Allow-Methods",
 		"OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT",
 	}
-	HEADER_AC_ALLOW_ORIGIN = HttpHeader{
+	HEADER_AC_ALLOW_ORIGIN = raiqub.HttpHeader{
 		"Access-Control-Allow-Origin",
 		"*",
 	}
@@ -75,8 +67,11 @@ type IntStringTuple struct {
 func NewCORSHandler() *CORSHandler {
 	return &CORSHandler{
 		PredicateOrigin: TrueForAll,
-		Headers:         make([]string, 0),
-		ExposedHeaders:  make([]string, 0),
+		Headers: []string{
+			"Origin", "X-Requested-With", "Content-Type",
+			"Accept", "Authorization",
+		},
+		ExposedHeaders: make([]string, 0),
 	}
 }
 
@@ -119,25 +114,26 @@ type CORSMethod struct {
 
 func (s *CORSMethod) CORSMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get(DEFAULT_CORS_ORIGIN_HEADER)
-		if r.Method != DEFAULT_CORS_PREFLIGHT_METHOD && origin != "" {
-			if !s.PredicateOrigin(origin) {
+		origin := raiqub.HttpHeader_Origin().GetReader(r.Header)
+		if r.Method != DEFAULT_CORS_PREFLIGHT_METHOD && origin.Value != "" {
+			if !s.PredicateOrigin(origin.Value) {
 				return
 			}
 
-			w.Header().Set(HEADER_AC_ALLOW_ORIGIN.Name, origin)
-			w.Header().Set(
-				HEADER_AC_ALLOW_CREDENTIALS.Name,
-				strconv.FormatBool(s.UseCredentials))
+			HEADER_AC_ALLOW_ORIGIN.
+				Clone().
+				SetValue(origin.Value).
+				SetWriter(w.Header())
+			raiqub.HttpHeader_AccessControlAllowCredentials().
+				SetValue(strconv.FormatBool(s.UseCredentials)).
+				SetWriter(w.Header())
 			if len(s.Headers) > 0 {
-				w.Header().Set(
-					HEADER_AC_ALLOW_HEADERS.Name,
-					strings.Join(s.Headers, ", "))
+				raiqub.HttpHeader_AccessControlAllowHeaders().
+					SetValue(strings.Join(s.Headers, ", ")).
+					SetWriter(w.Header())
 			} else {
-				w.Header().Set(
-					HEADER_AC_ALLOW_HEADERS.Name,
-					HEADER_AC_ALLOW_HEADERS.Value,
-				)
+				raiqub.HttpHeader_AccessControlAllowHeaders().
+					SetWriter(w.Header())
 			}
 		}
 		next.ServeHTTP(w, r)
@@ -153,14 +149,14 @@ type CORSPreflight struct {
 }
 
 func (s *CORSPreflight) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	origin := r.Header.Get(DEFAULT_CORS_ORIGIN_HEADER)
+	origin := raiqub.HttpHeader_Origin().GetReader(r.Header)
 	status := http.StatusBadRequest
 	defer func() {
 		w.WriteHeader(status)
 	}()
 
-	if origin != "" {
-		if !s.PredicateOrigin(origin) {
+	if origin.Value != "" {
+		if !s.PredicateOrigin(origin.Value) {
 			status = http.StatusForbidden
 			return
 		}
@@ -175,26 +171,25 @@ func (s *CORSPreflight) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(s.Headers) == 0 {
-			w.Header().Set(
-				HEADER_AC_ALLOW_HEADERS.Name,
-				HEADER_AC_ALLOW_HEADERS.Value)
+			raiqub.HttpHeader_AccessControlAllowHeaders().
+				SetWriter(w.Header())
 		} else {
 			if len(header) > 0 &&
 				!StringSlice(s.Headers).ExistsAllIgnoreCase(header) {
 				return
 			}
-			w.Header().Set(
-				HEADER_AC_ALLOW_HEADERS.Name,
-				strings.Join(s.Headers, ", "))
+			raiqub.HttpHeader_AccessControlAllowHeaders().
+				SetValue(strings.Join(s.Headers, ", ")).
+				SetWriter(w.Header())
 		}
 
 		w.Header().Set(
 			HEADER_AC_ALLOW_METHODS.Name,
 			strings.Join(s.Methods, ", "))
-		w.Header().Set(HEADER_AC_ALLOW_ORIGIN.Name, origin)
-		w.Header().Set(
-			HEADER_AC_ALLOW_CREDENTIALS.Name,
-			strconv.FormatBool(s.UseCredentials))
+		origin.SetWriter(w.Header())
+		raiqub.HttpHeader_AccessControlAllowCredentials().
+			SetValue(strconv.FormatBool(s.UseCredentials)).
+			SetWriter(w.Header())
 		// Optional
 		w.Header().Set(HEADER_AC_MAX_AGE.Name, HEADER_AC_MAX_AGE.Value)
 		status = http.StatusOK

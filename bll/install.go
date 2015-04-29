@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/skarllot/netpaper/dal"
 	"github.com/skarllot/netpaper/models"
+	"github.com/skarllot/raiqub"
 	"net/http"
 )
 
@@ -83,7 +84,9 @@ func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	txn.Commit()
-	w.Header().Add(HEADER_LOCATION.Name, fmt.Sprintf("/users/%d", reqObj.Id))
+	raiqub.HttpHeader_Location().
+		SetValue(fmt.Sprintf("/users/%d", reqObj.Id)).
+		SetWriter(w.Header())
 	JsonWrite(w, http.StatusCreated, reqObj)
 }
 

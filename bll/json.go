@@ -20,15 +20,11 @@ package bll
 
 import (
 	"encoding/json"
+	"github.com/skarllot/raiqub"
 	"io"
 	"io/ioutil"
 	"net/http"
 )
-
-type HttpHeader struct {
-	Name  string
-	Value string
-}
 
 const (
 	HTTP_BODY_MAX_LENGTH = 1048576
@@ -36,16 +32,8 @@ const (
 	StatusUnprocessableEntity = 422
 )
 
-var (
-	HEADER_JSON = HttpHeader{
-		"Content-Type",
-		"application/json; charset=UTF-8",
-	}
-	HEADER_LOCATION = HttpHeader{"Location", ""}
-)
-
 func JsonWrite(w http.ResponseWriter, status int, content interface{}) {
-	w.Header().Set(HEADER_JSON.Name, HEADER_JSON.Value)
+	raiqub.HttpHeader_ContentType_Json().SetWriter(w.Header())
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(content)
 }
