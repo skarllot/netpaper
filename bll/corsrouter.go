@@ -23,25 +23,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
 	DEFAULT_CORS_PREFLIGHT_METHOD = "OPTIONS"
-)
-
-var (
-	HEADER_AC_MAX_AGE = raiqub.HttpHeader{
-		"Access-Control-Max-Age",
-		"86400",
-	}
-	HEADER_AC_ALLOW_METHODS = raiqub.HttpHeader{
-		"Access-Control-Allow-Methods",
-		"OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT",
-	}
-	HEADER_AC_ALLOW_ORIGIN = raiqub.HttpHeader{
-		"Access-Control-Allow-Origin",
-		"*",
-	}
+	DEFAULT_CORS_MAX_AGE          = time.Hour * 24 / time.Second
+	DEFAULT_CORS_METHODS          = "OPTIONS, GET, HEAD, POST, PUT, DELETE, TRACE, CONNECT"
+	DEFAULT_CORS_ORIGIN           = "*"
 )
 
 type CORSRouter struct {
@@ -120,8 +109,7 @@ func (s *CORSMethod) CORSMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-			HEADER_AC_ALLOW_ORIGIN.
-				Clone().
+			raiqub.HttpHeader_AccessControlAllowOrigin().
 				SetValue(origin.Value).
 				SetWriter(w.Header())
 			raiqub.HttpHeader_AccessControlAllowCredentials().
@@ -183,15 +171,17 @@ func (s *CORSPreflight) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				SetWriter(w.Header())
 		}
 
-		w.Header().Set(
-			HEADER_AC_ALLOW_METHODS.Name,
-			strings.Join(s.Methods, ", "))
+		raiqub.HttpHeader_AccessControlAllowMethods().
+			SetValue(strings.Join(s.Methods, ", ")).
+			SetWriter(w.Header())
 		origin.SetWriter(w.Header())
 		raiqub.HttpHeader_AccessControlAllowCredentials().
 			SetValue(strconv.FormatBool(s.UseCredentials)).
 			SetWriter(w.Header())
 		// Optional
-		w.Header().Set(HEADER_AC_MAX_AGE.Name, HEADER_AC_MAX_AGE.Value)
+		raiqub.HttpHeader_AccessControlMaxAge().
+			SetValue(strconv.Itoa(int(DEFAULT_CORS_MAX_AGE))).
+			SetWriter(w.Header())
 		status = http.StatusOK
 	} else {
 		status = http.StatusNotFound
