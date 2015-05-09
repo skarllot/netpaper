@@ -21,6 +21,7 @@ package bll
 import (
 	"github.com/gorilla/context"
 	"github.com/skarllot/netpaper/dal"
+	rqhttp "github.com/skarllot/raiqub/http"
 	"log"
 	"net/http"
 )
@@ -66,16 +67,16 @@ func (self *Logon) Destroy(w http.ResponseWriter, r *http.Request) {
 	JsonWrite(w, http.StatusOK, "")
 }
 
-func (self *Logon) Routes() Routes {
-	return Routes{
-		Route{
+func (self *Logon) Routes() rqhttp.Routes {
+	return rqhttp.Routes{
+		rqhttp.Route{
 			"AuthValidate",
 			"GET",
 			"/auth/validate",
 			true,
 			self.Validate,
 		},
-		Route{
+		rqhttp.Route{
 			"AuthDestroy",
 			"POST",
 			"/auth/destroy",

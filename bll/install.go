@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"github.com/skarllot/netpaper/dal"
 	"github.com/skarllot/netpaper/models"
-	"github.com/skarllot/raiqub"
+	rqhttp "github.com/skarllot/raiqub/http"
 	"net/http"
 )
 
@@ -84,22 +84,22 @@ func (self *Install) CreateFirstUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	txn.Commit()
-	raiqub.HttpHeader_Location().
+	rqhttp.HttpHeader_Location().
 		SetValue(fmt.Sprintf("/users/%d", reqObj.Id)).
 		SetWriter(w.Header())
 	JsonWrite(w, http.StatusCreated, reqObj)
 }
 
-func (self *Install) Routes() Routes {
-	return Routes{
-		Route{
+func (self *Install) Routes() rqhttp.Routes {
+	return rqhttp.Routes{
+		rqhttp.Route{
 			"GetInstallStatus",
 			"GET",
 			"/install",
 			false,
 			self.GetInstallStatus,
 		},
-		Route{
+		rqhttp.Route{
 			"CreateFirstUser",
 			"POST",
 			"/install",

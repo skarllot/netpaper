@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
-	"github.com/justinas/alice"
 	"github.com/skarllot/netpaper/bll"
+	rqhttp "github.com/skarllot/raiqub/http"
 	"log"
 	"net/http"
 	"runtime"
@@ -57,40 +57,43 @@ func main() {
 
 	logon := bll.Logon{&appC}
 
-	commonHandlers := alice.New(
+	commonHandlers := rqhttp.Chain{
 		context.ClearHandler,
 		appC.LoggingHandler,
-		recoverHandler)
-	handlersAuth := commonHandlers.
-		Append((bll.HttpBasicAuthenticator{&logon}).BasicAuth)
+		recoverHandler,
+	}
 	cors := bll.NewCORSHandler()
+	noAuthHandlers := append(commonHandlers,
+		(&bll.CORSMethod{*cors, false}).CORSMiddleware)
+	authHandlers := append(commonHandlers,
+		(bll.HttpBasicAuthenticator{&logon}).BasicAuth,
+		(&bll.CORSMethod{*cors, true}).CORSMiddleware)
 
 	router := mux.NewRouter().StrictSlash(true)
 	v1 := router.PathPrefix("/v1").Subrouter()
 
-	routes := make(bll.Routes, 0)
-	routes = append(routes, (&bll.Languages{&appC}).Routes()...)
-	routes = append(routes, (&bll.Install{&appC}).Routes()...)
-	routes = append(routes, logon.Routes()...)
+	routes := rqhttp.MergeRoutes(
+		&bll.Languages{&appC},
+		&bll.Install{&appC},
+		&logon,
+	)
 
 	corsRoutes := cors.CreateOptionsRoutes(routes)
 	routes = append(routes, corsRoutes...)
 
 	for _, r := range routes {
-		var handlers alice.Chain
+		handler := r.ActionFunc
 		if r.MustAuth {
-			handlers = handlersAuth
+			handler = authHandlers.Get(handler).ServeHTTP
 		} else {
-			handlers = commonHandlers
+			handler = noAuthHandlers.Get(handler).ServeHTTP
 		}
-		handlers = handlers.Append(
-			(&bll.CORSMethod{*cors, r.MustAuth}).CORSMiddleware)
 
 		v1.
 			Methods(r.Method).
-			Path(r.Pattern).
+			Path(r.Path).
 			Name(r.Name).
-			Handler(handlers.ThenFunc(r.HandlerFunc))
+			Handler(handler)
 	}
 
 	fmt.Println("HTTP server listening on port", cfg.Application.Port)

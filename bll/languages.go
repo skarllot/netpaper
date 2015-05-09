@@ -20,6 +20,7 @@ package bll
 
 import (
 	"github.com/skarllot/netpaper/dal"
+	rqhttp "github.com/skarllot/raiqub/http"
 	"net/http"
 )
 
@@ -45,9 +46,9 @@ func (self *Languages) GetLanguages(w http.ResponseWriter, r *http.Request) {
 	JsonWrite(w, http.StatusOK, rows)
 }
 
-func (self *Languages) Routes() Routes {
-	return Routes{
-		Route{
+func (self *Languages) Routes() rqhttp.Routes {
+	return rqhttp.Routes{
+		rqhttp.Route{
 			"GetLanguages",
 			"GET",
 			"/languages",

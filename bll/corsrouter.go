@@ -19,7 +19,7 @@
 package bll
 
 import (
-	"github.com/skarllot/raiqub"
+	rqhttp "github.com/skarllot/raiqub/http"
 	"net/http"
 	"strconv"
 	"strings"
@@ -37,7 +37,7 @@ type CORSRouter struct {
 	inner               http.Handler
 	routes              map[string]string
 	AllowOrigin         PredicateStringFunc
-	PreflightMiddleware HttpMiddlewareFunc
+	PreflightMiddleware rqhttp.HttpMiddlewareFunc
 }
 
 type CORSHandler struct {
@@ -47,7 +47,6 @@ type CORSHandler struct {
 }
 
 type PredicateStringFunc func(string) bool
-type HttpMiddlewareFunc func(http.Handler) http.Handler
 type IntStringTuple struct {
 	Item1 int
 	Item2 string
@@ -64,29 +63,29 @@ func NewCORSHandler() *CORSHandler {
 	}
 }
 
-func (s *CORSHandler) CreateOptionsRoutes(routes Routes) Routes {
-	list := make(Routes, 0, len(routes))
+func (s *CORSHandler) CreateOptionsRoutes(routes rqhttp.Routes) rqhttp.Routes {
+	list := make(rqhttp.Routes, 0, len(routes))
 	hList := make(map[string]*CORSPreflight, len(routes))
 	for _, v := range routes {
-		preflight, ok := hList[v.Pattern]
+		preflight, ok := hList[v.Path]
 		if !ok {
 			preflight = &CORSPreflight{
 				*s,
 				make([]string, 0, 1),
 				v.MustAuth,
 			}
-			hList[v.Pattern] = preflight
+			hList[v.Path] = preflight
 		}
 		preflight.Methods = append(preflight.Methods, v.Method)
 	}
 
 	for k, v := range hList {
-		list = append(list, Route{
-			Name:        "",
-			Method:      DEFAULT_CORS_PREFLIGHT_METHOD,
-			Pattern:     k,
-			MustAuth:    v.UseCredentials,
-			HandlerFunc: v.ServeHTTP,
+		list = append(list, rqhttp.Route{
+			Name:       "",
+			Method:     DEFAULT_CORS_PREFLIGHT_METHOD,
+			Path:       k,
+			MustAuth:   v.UseCredentials,
+			ActionFunc: v.ServeHTTP,
 		})
 	}
 	return list
@@ -103,24 +102,24 @@ type CORSMethod struct {
 
 func (s *CORSMethod) CORSMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		origin := raiqub.HttpHeader_Origin().GetReader(r.Header)
+		origin := rqhttp.HttpHeader_Origin().GetReader(r.Header)
 		if r.Method != DEFAULT_CORS_PREFLIGHT_METHOD && origin.Value != "" {
 			if !s.PredicateOrigin(origin.Value) {
 				return
 			}
 
-			raiqub.HttpHeader_AccessControlAllowOrigin().
+			rqhttp.HttpHeader_AccessControlAllowOrigin().
 				SetValue(origin.Value).
 				SetWriter(w.Header())
-			raiqub.HttpHeader_AccessControlAllowCredentials().
+			rqhttp.HttpHeader_AccessControlAllowCredentials().
 				SetValue(strconv.FormatBool(s.UseCredentials)).
 				SetWriter(w.Header())
 			if len(s.Headers) > 0 {
-				raiqub.HttpHeader_AccessControlAllowHeaders().
+				rqhttp.HttpHeader_AccessControlAllowHeaders().
 					SetValue(strings.Join(s.Headers, ", ")).
 					SetWriter(w.Header())
 			} else {
-				raiqub.HttpHeader_AccessControlAllowHeaders().
+				rqhttp.HttpHeader_AccessControlAllowHeaders().
 					SetWriter(w.Header())
 			}
 		}
@@ -137,7 +136,7 @@ type CORSPreflight struct {
 }
 
 func (s *CORSPreflight) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	origin := raiqub.HttpHeader_Origin().GetReader(r.Header)
+	origin := rqhttp.HttpHeader_Origin().GetReader(r.Header)
 	status := http.StatusBadRequest
 	defer func() {
 		w.WriteHeader(status)
@@ -159,27 +158,27 @@ func (s *CORSPreflight) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(s.Headers) == 0 {
-			raiqub.HttpHeader_AccessControlAllowHeaders().
+			rqhttp.HttpHeader_AccessControlAllowHeaders().
 				SetWriter(w.Header())
 		} else {
 			if len(header) > 0 &&
 				!StringSlice(s.Headers).ExistsAllIgnoreCase(header) {
 				return
 			}
-			raiqub.HttpHeader_AccessControlAllowHeaders().
+			rqhttp.HttpHeader_AccessControlAllowHeaders().
 				SetValue(strings.Join(s.Headers, ", ")).
 				SetWriter(w.Header())
 		}
 
-		raiqub.HttpHeader_AccessControlAllowMethods().
+		rqhttp.HttpHeader_AccessControlAllowMethods().
 			SetValue(strings.Join(s.Methods, ", ")).
 			SetWriter(w.Header())
 		origin.SetWriter(w.Header())
-		raiqub.HttpHeader_AccessControlAllowCredentials().
+		rqhttp.HttpHeader_AccessControlAllowCredentials().
 			SetValue(strconv.FormatBool(s.UseCredentials)).
 			SetWriter(w.Header())
 		// Optional
-		raiqub.HttpHeader_AccessControlMaxAge().
+		rqhttp.HttpHeader_AccessControlMaxAge().
 			SetValue(strconv.Itoa(int(DEFAULT_CORS_MAX_AGE))).
 			SetWriter(w.Header())
 		status = http.StatusOK
